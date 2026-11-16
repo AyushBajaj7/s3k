@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlowSync AI | Enterprise Request & Approval Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#075985',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    code, pre {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col">
+
+  <!-- Top Global Navigation Bar -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Brand & Platform Identity -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 via-indigo-600 to-cyan-500 flex items-center justify-center text-white shadow-md shadow-sky-500/20">
+            <i class="fa-solid fa-layer-group text-lg"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-lg tracking-tight text-slate-900">FlowSync<span class="text-sky-600">.ai</span></span>
+              <span class="px-2 py-0.5 text-[10px] font-semibold bg-emerald-100 text-emerald-800 rounded-full border border-emerald-200">v2.4 Live</span>
+            </div>
+            <p class="text-xs text-slate-500 font-medium">Enterprise Request & Approval Platform • S3K Case Study 03</p>
+          </div>
+        </div>
+
+        <!-- Middle Action Bar: Tenant & Quick Search -->
+        <div class="hidden md:flex items-center gap-4">
+          <div class="flex items-center gap-1.5 px-3 py-1 bg-slate-100 rounded-lg text-xs font-medium text-slate-600 border border-slate-200">
+            <i class="fa-solid fa-building text-slate-400"></i>
+            <span>Acme Corp</span>
+            <span class="text-slate-400">•</span>
+            <span>100 Employees</span>
+          </div>
+
+          <div class="relative w-72">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-400"></i>
+            <input type="text" id="globalSearch" placeholder="Search by PR #, vendor, requester..." 
+                   class="w-full pl-8 pr-4 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all">
+          </div>
+        </div>
+
+        <!-- Right Side: User Profile & Role Switcher Simulator -->
+        <div class="flex items-center gap-3">
+          <!-- Role Switcher -->
+          <div class="flex flex-col text-right">
+            <span class="text-[10px] uppercase tracking-wider font-semibold text-slate-400">Viewing As Persona</span>
+            <select id="roleSwitcher" onchange="switchRole(this.value)" 
+                    class="text-xs font-semibold text-slate-700 bg-sky-50/80 border border-sky-200 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer">
+              <option value="requester">👤 Priya Sharma (Requester / Dev)</option>
+              <option value="manager" selected>👔 Arun Verma (Line Manager - Eng)</option>
+              <option value="finance">💼 Neha Gupta (Finance Manager)</option>
+              <option value="depthead">👑 Rajesh Patel (VP / Dept Head)</option>
+            </select>
+          </div>
+
+          <!-- Notification Bell -->
+          <button class="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors">
+            <i class="fa-regular fa-bell text-sm"></i>
+            <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
+          </button>
+
+          <!-- New Request CTA -->
+          <button onclick="openNewRequestModal()" 
+                  class="flex items-center gap-2 px-3.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-semibold shadow-sm shadow-sky-600/30 transition-all hover:scale-[1.02]">
+            <i class="fa-solid fa-plus text-xs"></i>
+            <span>New Purchase Request</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Governance & System Banner -->
+  <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white text-xs py-2 px-4 border-b border-indigo-900/40">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
+          <i class="fa-solid fa-shield-halved mr-1"></i> S3K Principle: AI Assisted – Human Governed
+        </span>
+        <span class="text-slate-300">Policy Guardrail Active: AI synthesizes summaries & highlights risks, but <strong class="text-white">never independently approves financial requests</strong>.</span>
+      </div>
+      <div class="flex items-center gap-4 text-slate-300 text-[11px]">
+        <span><i class="fa-solid fa-lock text-sky-400 mr-1"></i> Row-Level Security (RLS) Enforced</span>
+        <span><i class="fa-solid fa-clock-rotate-left text-indigo-400 mr-1"></i> Immutable Audit Log</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+    <!-- KPI Metric Cards (As per Case Study 03 Target Outcomes) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      
+      <!-- KPI 1: Cycle Time (TAT) -->
+      <div class="bg-white rounded-xl p-4 border border-slate-200/80 shadow-sm hover:shadow transition-shadow">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Median Approval TAT</span>
+          <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-bolt-lightning"></i>
+          </span>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span class="text-2xl font-extrabold text-slate-900">18.4 hrs</span>
+          <span class="text-xs font-semibold text-emerald-600 flex items-center gap-0.5">
+            <i class="fa-solid fa-arrow-trend-down"></i> -84%
+          </span>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-1">Reduced from baseline of <strong class="text-slate-700">5.0 working days</strong></p>
+      </div>
+
+      <!-- KPI 2: First-Time-Right (FTR) Submissions -->
+      <div class="bg-white rounded-xl p-4 border border-slate-200/80 shadow-sm hover:shadow transition-shadow">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">First-Time-Right (FTR)</span>
+          <span class="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-circle-check"></i>
+          </span>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span class="text-2xl font-extrabold text-slate-900">96.8%</span>
+          <span class="text-xs font-semibold text-emerald-600 flex items-center gap-0.5">
+            <i class="fa-solid fa-arrow-trend-up"></i> +24.8%
+          </span>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-1">Incomplete requests dropped from <strong class="text-rose-600">28%</strong> to <strong class="text-emerald-600">3.2%</strong></p>
+      </div>
+
+      <!-- KPI 3: Status Inquiries & Chasing -->
+      <div class="bg-white rounded-xl p-4 border border-slate-200/80 shadow-sm hover:shadow transition-shadow">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Manual Status Pings</span>
+          <span class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-comments"></i>
+          </span>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span class="text-2xl font-extrabold text-slate-900">8 / mo</span>
+          <span class="text-xs font-semibold text-emerald-600 flex items-center gap-0.5">
+            <i class="fa-solid fa-arrow-trend-down"></i> -91%
+          </span>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-1">Self-serve timeline & AI Copilot deflected 120+ emails</p>
+      </div>
+
+      <!-- Policy Guardrail Compliance -->
+      <div class="bg-white rounded-xl p-4 border border-slate-200/80 shadow-sm hover:shadow transition-shadow">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Policy Rules Enforced</span>
+          <span class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-gavel"></i>
+          </span>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span class="text-2xl font-extrabold text-slate-900">100%</span>
+          <span class="text-xs font-semibold text-emerald-600 flex items-center gap-0.5">
+            <i class="fa-solid fa-check-double"></i> 0 Leaks
+          </span>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-1">Tiered limits (₹25k / ₹1L) & 2-quote requirements active</p>
+      </div>
+
+    </div>
+
+    <!-- Tier Rule Legend / Cheatsheet -->
+    <div class="bg-sky-50/70 border border-sky-200/70 rounded-xl p-3 mb-6 flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-sky-900 flex items-center gap-1.5">
+          <i class="fa-solid fa-circle-info text-sky-600"></i> Automated Policy Matrix:
+        </span>
+        <span class="text-slate-600">Dynamic routing rules configured for Acme Corp:</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-2 sm:gap-4 font-medium text-slate-700">
+        <span class="inline-flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-slate-200 shadow-2xs">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span> <strong>Tier 1:</strong> ≤ ₹25,000 <span class="text-slate-400">→</span> Line Manager
+        </span>
+        <span class="inline-flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-slate-200 shadow-2xs">
+          <span class="w-2 h-2 rounded-full bg-blue-500"></span> <strong>Tier 2:</strong> ₹25,001 - ₹1,00,000 <span class="text-slate-400">→</span> Manager + Finance
+        </span>
+        <span class="inline-flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-slate-200 shadow-2xs">
+          <span class="w-2 h-2 rounded-full bg-purple-500"></span> <strong>Tier 3:</strong> > ₹1,00,000 <span class="text-slate-400">→</span> Manager + Finance + Dept Head
+        </span>
+        <span class="inline-flex items-center gap-1 bg-rose-50 text-rose-700 px-2.5 py-1 rounded-md border border-rose-200 shadow-2xs">
+          <i class="fa-solid fa-file-circle-xmark"></i> Missing Docs Block Approval
+        </span>
+      </div>
+    </div>
+
+    <!-- Approval Workspace Card -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      
+      <!-- Workspace Header & Filter Bar -->
+      <div class="p-4 sm:p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+            <span>Approval Workspace</span>
+            <span id="roleBadge" class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-sky-100 text-sky-800 border border-sky-200">
+              Logged in: Arun Verma (Line Manager)
+            </span>
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">Manage, review, and govern departmental purchase authorizations.</p>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-lg text-xs font-semibold text-slate-600">
+          <button onclick="filterTable('all')" id="tabAll" class="px-3 py-1.5 rounded-md bg-white text-slate-900 shadow-xs transition-all">All Requests (5)</button>
+          <button onclick="filterTable('pending')" id="tabPending" class="px-3 py-1.5 rounded-md hover:text-slate-900 transition-all flex items-center gap-1.5">
+            <span>Requires Action</span>
+            <span id="actionCountBadge" class="px-1.5 py-0.2 bg-amber-500 text-white text-[10px] rounded-full">3</span>
+          </button>
+          <button onclick="filterTable('flagged')" id="tabFlagged" class="px-3 py-1.5 rounded-md hover:text-slate-900 transition-all flex items-center gap-1.5">
+            <span class="text-rose-600">Risk Flagged</span>
+            <span class="px-1.5 py-0.2 bg-rose-100 text-rose-700 text-[10px] rounded-full border border-rose-200">2</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Requests Data Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs" id="requestsTable">
+          <thead class="bg-slate-50/80 text-slate-500 font-semibold uppercase tracking-wider text-[11px] border-b border-slate-200">
+            <tr>
+              <th class="py-3 px-4">Request ID & Title</th>
+              <th class="py-3 px-4">Requester & Dept</th>
+              <th class="py-3 px-4">Amount & Tier</th>
+              <th class="py-3 px-4">AI Risk & Validation</th>
+              <th class="py-3 px-4">Current Stage & Approver</th>
+              <th class="py-3 px-4">Documents</th>
+              <th class="py-3 px-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-slate-700" id="requestsTableBody">
+            <!-- Rows dynamically injected via JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Table Footer / Pagination -->
+      <div class="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+        <div class="flex items-center gap-2">
+          <span>Showing <strong>5 of 5</strong> active requests</span>
+          <span class="text-slate-300">•</span>
+          <span class="text-emerald-600 font-medium"><i class="fa-solid fa-shield text-[10px]"></i> Object-Level Access Controlled (Zero IDOR exposure)</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="text-slate-400">Page 1 of 1</span>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Sticky Bottom Bar / Floating Copilot Trigger -->
+  <div class="fixed bottom-5 right-5 z-30 flex items-center gap-3">
+    <button onclick="toggleCopilot()" 
+            class="flex items-center gap-2.5 px-4 py-3 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white rounded-full shadow-lg shadow-sky-600/30 hover:scale-105 transition-all text-xs font-bold">
+      <span class="relative flex h-3 w-3">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-300 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3 w-3 bg-sky-200"></span>
+      </span>
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      <span>Ask Policy & Status Copilot</span>
+    </button>
+  </div>
+
+  <!-- MODAL 1: Request Detail & Human Approval Workspace Drawer -->
+  <div id="requestModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-5xl max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span id="modalPrBadge" class="font-mono text-xs px-2.5 py-1 bg-sky-100 text-sky-800 rounded-lg font-bold border border-sky-200">
+            PR-2026-089
+          </span>
+          <div>
+            <h3 id="modalPrTitle" class="text-base font-bold text-slate-900">Datadog Enterprise APM Subscription (Annual)</h3>
+            <p id="modalPrSubtitle" class="text-xs text-slate-500">Submitted by Priya Sharma • Engineering • Category: Cloud SaaS</p>
+          </div>
+        </div>
+        <button onclick="closeRequestModal()" class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 flex items-center justify-center transition-colors">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (Two-Column Layout) -->
+      <div class="p-6 overflow-y-auto custom-scrollbar flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left Column: Request Details & Document Inspection (7 cols) -->
+        <div class="lg:col-span-7 space-y-5">
+          
+          <!-- Key Metrics / Meta Box -->
+          <div class="grid grid-cols-3 gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200/80">
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total Amount</span>
+              <p id="modalAmount" class="text-lg font-black text-slate-900">₹1,45,000</p>
+              <span id="modalTierBadge" class="inline-block mt-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-800">
+                Tier 3 (> ₹1,00,000)
+              </span>
+            </div>
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Budget Impact</span>
+              <p class="text-xs font-bold text-slate-800 mt-1">₹4,20,000 Remaining</p>
+              <span class="text-[10px] text-emerald-600 font-semibold"><i class="fa-solid fa-check"></i> Within Q4 Budget</span>
+            </div>
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Vendor & GSTIN</span>
+              <p id="modalVendor" class="text-xs font-bold text-slate-800 mt-1">Datadog Singapore Pte</p>
+              <span class="text-[10px] text-slate-500 font-mono">GST: 07AABCD1234E1Z8</span>
+            </div>
+          </div>
+
+          <!-- Business Justification -->
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Business Justification</h4>
+            <div id="modalJustification" class="p-3 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 leading-relaxed">
+              Required for real-time latency monitoring, Kubernetes pod telemetry, and incident tracing for the Q4 production launch. Existing trial plan expired on Nov 10.
+            </div>
+          </div>
+
+          <!-- Document Inspection & OCR Extraction Breakdown -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Attached Documents & OCR Verification</h4>
+              <span class="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
+                <i class="fa-solid fa-circle-check"></i> OCR Confirmed (98.6% match)
+              </span>
+            </div>
+            
+            <!-- Document Cards -->
+            <div class="space-y-2" id="modalDocumentsList">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- Sequential Multi-Tier Approval Progress -->
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Multi-Tier Approval Pathway</h4>
+            <div class="relative pl-6 space-y-4 border-l-2 border-slate-200 text-xs" id="modalWorkflowTimeline">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: AI Assistant Synthesis & Policy Risk Engine (5 cols) -->
+        <div class="lg:col-span-5 space-y-4">
+          
+          <!-- AI Synthesis Card -->
+          <div class="bg-gradient-to-b from-sky-50 to-indigo-50/40 rounded-xl p-4 border border-sky-200 shadow-2xs">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-md bg-sky-600 text-white flex items-center justify-center text-xs">
+                  <i class="fa-solid fa-brain"></i>
+                </div>
+                <span class="font-bold text-xs text-sky-950">AI Policy & Risk Copilot</span>
+              </div>
+              <span id="modalAiRiskPill" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                LOW RISK
+              </span>
+            </div>
+
+            <!-- AI 3-Point Summary -->
+            <div class="space-y-2 mb-3">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Executive Summary</span>
+              <ul class="text-xs text-slate-700 space-y-1.5 pl-4 list-disc" id="modalAiBullets">
+                <!-- Injected via JS -->
+              </ul>
+            </div>
+
+            <!-- Policy Compliance Checklist -->
+            <div class="space-y-1.5 pt-2 border-t border-sky-200/60" id="modalPolicyChecks">
+              <!-- Injected via JS -->
+            </div>
+
+            <!-- Human Governance Disclaimer -->
+            <div class="mt-3 p-2 bg-amber-50 rounded-lg border border-amber-200 text-[10px] text-amber-800 flex items-start gap-1.5">
+              <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i>
+              <span><strong>Decision Policy:</strong> AI provides assistive recommendation only. Final financial approval requires authenticated human sign-off.</span>
+            </div>
+          </div>
+
+          <!-- Audit Log Trail (Tamper-evident) -->
+          <div class="bg-white rounded-xl p-4 border border-slate-200">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Immutable Audit Trail</h4>
+              <span class="text-[10px] text-slate-400 font-mono">SHA-256 Verified</span>
+            </div>
+            <div class="space-y-2 text-[11px] font-mono text-slate-600 max-h-40 overflow-y-auto custom-scrollbar" id="modalAuditLogs">
+              <!-- Logs injected via JS -->
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Modal Footer Action Bar (Human Governance) -->
+      <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2 text-xs text-slate-500">
+          <i class="fa-solid fa-fingerprint text-slate-400"></i>
+          <span>Signed in as <strong id="currentPersonaName">Arun Verma</strong> (<span id="currentPersonaRole">Manager</span>)</span>
+        </div>
+
+        <div class="flex items-center gap-2" id="modalActionButtons">
+          <!-- Buttons dynamically adjusted based on active persona and approval rules -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL 2: New Purchase Request (With AI-Assisted OCR Simulation) -->
+  <div id="newRequestModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-sky-600 text-white flex items-center justify-center text-xs">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">Create New Purchase Request</h3>
+            <p class="text-xs text-slate-500">Automated validation will scan your attachments to ensure First-Time-Right submission.</p>
+          </div>
+        </div>
+        <button onclick="closeNewRequestModal()" class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="newRequestForm" onsubmit="submitNewRequest(event)" class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-4 text-xs">
+        
+        <!-- File Dropzone with One-Click AI Ingestion Demo -->
+        <div class="p-4 border-2 border-dashed border-sky-300 rounded-xl bg-sky-50/50 text-center hover:bg-sky-50 transition-colors">
+          <i class="fa-solid fa-cloud-arrow-up text-2xl text-sky-600 mb-2"></i>
+          <p class="font-semibold text-slate-700">Drag & drop your Vendor Quotation or Pro-forma Invoice</p>
+          <p class="text-[11px] text-slate-500 mt-0.5">Supports PDF, PNG, JPG (Max 15MB). Instant AI OCR field extraction.</p>
+          <div class="mt-3">
+            <button type="button" onclick="simulateAiOcrUpload()" 
+                    class="px-3 py-1.5 bg-white border border-sky-300 text-sky-700 hover:bg-sky-100 rounded-lg font-bold text-xs shadow-2xs inline-flex items-center gap-1.5">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i>
+              <span>Simulate AI OCR Ingestion (Auto-fill Demo)</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="ocrSuccessNotice" class="hidden p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 flex items-center justify-between text-xs animate-in fade-in">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+            <span><strong>AI OCR Extracted:</strong> Vendor: JetBrains s.r.o. | Amount: ₹38,400 | GSTIN Validated</span>
+          </div>
+          <span class="text-[10px] bg-emerald-200 text-emerald-900 px-1.5 py-0.5 rounded font-mono">100% Valid</span>
+        </div>
+
+        <!-- Form Inputs -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Purchase Title *</label>
+            <input type="text" id="formTitle" required placeholder="e.g. JetBrains All Products Pack" 
+                   class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Category *</label>
+            <select id="formCategory" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
+              <option value="SaaS & Cloud">Software / Cloud SaaS</option>
+              <option value="Hardware">IT Hardware / Equipment</option>
+              <option value="Consulting">Professional Consulting</option>
+              <option value="Office Supplies">Office Supplies & Facilities</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Estimated Cost (INR ₹) *</label>
+            <input type="number" id="formAmount" required placeholder="38400" oninput="updateTierLiveFeedback(this.value)"
+                   class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
+            <p id="tierLiveFeedback" class="text-[10px] font-medium text-slate-500 mt-1">Rule: ≤ ₹25k Manager only | ₹25k-₹1L Manager+Finance | > ₹1L Dept Head</p>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Vendor Name *</label>
+            <input type="text" id="formVendor" required placeholder="e.g. JetBrains s.r.o." 
+                   class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Business Justification *</label>
+          <textarea id="formJustification" rows="2.5" required placeholder="Explain why this purchase is essential and how it supports current deliverables..." 
+                    class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"></textarea>
+        </div>
+
+        <!-- Missing Document Safeguard Warning -->
+        <div class="p-3 bg-amber-50/70 border border-amber-200 rounded-lg text-amber-900 text-[11px] flex items-start gap-2">
+          <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i>
+          <div>
+            <strong>Automated First-Time-Right Safeguard:</strong>
+            Submissions over ₹50,000 without at least two competitive vendor quotes or invoices without tax credentials will be automatically flagged before final approval.
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-2">
+          <button type="button" onclick="closeNewRequestModal()" class="px-4 py-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-100 font-semibold">
+            Cancel
+          </button>
+          <button type="submit" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-bold shadow-sm shadow-sky-600/30 flex items-center gap-1.5">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span>Submit Request for Validation</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- FLOATING DRAWER: Conversational Policy & Status Copilot -->
+  <div id="copilotDrawer" class="fixed bottom-20 right-5 w-96 max-w-[calc(100vw-2.5rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-40 hidden flex flex-col h-[520px] animate-in slide-in-from-bottom-5 duration-200">
+    
+    <!-- Copilot Header -->
+    <div class="p-3.5 bg-gradient-to-r from-sky-600 via-indigo-600 to-sky-700 text-white flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center text-xs">
+          <i class="fa-solid fa-robot"></i>
+        </div>
+        <div>
+          <h4 class="font-bold text-xs">FlowSync Policy & Status Copilot</h4>
+          <p class="text-[10px] text-sky-100">Natural language search over requests & rules</p>
+        </div>
+      </div>
+      <button onclick="toggleCopilot()" class="text-white/80 hover:text-white p-1">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+    </div>
+
+    <!-- Copilot Chat Window -->
+    <div id="copilotChat" class="flex-1 p-3 overflow-y-auto custom-scrollbar space-y-3 bg-slate-50 text-xs">
+      
+      <!-- Welcome Message -->
+      <div class="flex items-start gap-2">
+        <div class="w-6 h-6 rounded-full bg-sky-600 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">
+          <i class="fa-solid fa-sparkles"></i>
+        </div>
+        <div class="bg-white p-2.5 rounded-xl rounded-tl-none border border-slate-200 shadow-2xs text-slate-800 space-y-1">
+          <p class="font-medium">Hello! I am your Enterprise Policy & Request Assistant.</p>
+          <p class="text-[11px] text-slate-500">You can ask me about request statuses, approval tiers, or expense policies. Try one of the prompts below:</p>
+        </div>
+      </div>
+
+      <!-- Quick Prompt Pills -->
+      <div class="flex flex-wrap gap-1.5 pl-8">
+        <button onclick="sendQuickPrompt('What is the status of PR-2026-089?')" class="text-[11px] bg-sky-100/80 hover:bg-sky-200 text-sky-800 px-2 py-1 rounded-md font-medium text-left border border-sky-200">
+          📍 Status of PR-2026-089?
+        </button>
+        <button onclick="sendQuickPrompt('Who needs to approve a ₹65,000 purchase?')" class="text-[11px] bg-sky-100/80 hover:bg-sky-200 text-sky-800 px-2 py-1 rounded-md font-medium text-left border border-sky-200">
+          ⚖️ Approval rules for ₹65,000?
+        </button>
+        <button onclick="sendQuickPrompt('Can AI approve a purchase independently?')" class="text-[11px] bg-sky-100/80 hover:bg-sky-200 text-sky-800 px-2 py-1 rounded-md font-medium text-left border border-sky-200">
+          🛡️ Can AI approve independently?
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Copilot Input Box -->
+    <div class="p-2.5 bg-white border-t border-slate-200 flex items-center gap-2">
+      <input type="text" id="copilotInput" onkeydown="handleCopilotKey(event)" placeholder="Ask about requests or policy..." 
+             class="flex-1 text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
+      <button onclick="sendCopilotMessage()" class="w-8 h-8 rounded-lg bg-sky-600 hover:bg-sky-700 text-white flex items-center justify-center text-xs shadow-2xs">
+        <i class="fa-solid fa-arrow-up"></i>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- JavaScript Prototype Engine -->
+  <script>
+    // State management for mock database
+    const MOCK_DATA = [
+      {
+        id: "PR-2026-089",
+        title: "Datadog Enterprise APM Subscription (Annual)",
+        requester: "Priya Sharma",
+        department: "Engineering",
+        amount: 145000,
+        tier: "Tier 3 (> ₹1,00,000)",
+        category: "Cloud SaaS",
+        vendor: "Datadog Singapore Pte",
+        status: "Pending Dept Head",
+        statusType: "pending_depthead",
+        aiRiskLevel: "LOW RISK",
+        aiRiskClass: "bg-emerald-100 text-emerald-800 border-emerald-200",
+        aiSummary: [
+          "Annual APM monitoring renewal for production Kubernetes infrastructure.",
+          "Tier 3 threshold (> ₹1,00,000) triggered; requires Line Manager, Finance, and Dept Head sign-offs.",
+          "Approved by Line Manager (Arun Verma) and Finance (Neha Gupta). Awaiting Dept Head (Rajesh Patel)."
+        ],
+        policyChecks: [
+          { label: "Within Q4 Engineering Software Budget", pass: true },
+          { label: "Valid Vendor GSTIN & Tax invoice verified via OCR", pass: true },
+          { label: "Comparative vendor quote included (New Relic / Grafana)", pass: true },
+          { label: "Duplicate invoice check: Clean (0 historical matches)", pass: true }
+        ],
+        documents: [
+          { name: "Datadog_Enterprise_Invoice_INV-89102.pdf", size: "2.4 MB", ocrScore: "99.2%", status: "Verified" },
+          { name: "Grafana_Cloud_Comparative_Quote.pdf", size: "1.1 MB", ocrScore: "98.1%", status: "Verified" }
+        ],
+        workflowSteps: [
+          { role: "Line Manager", name: "Arun Verma", status: "Approved", time: "Nov 15, 11:20 AM", note: "Approved. Critical for Q4 launch." },
+          { role: "Finance Manager", name: "Neha Gupta", status: "Approved", time: "Nov 15, 03:45 PM", note: "Budget confirmed under Cost Center 402." },
+          { role: "Department Head", name: "Rajesh Patel", status: "Pending", time: "In Review", note: "Final sign-off required for PO release." }
+        ],
+        auditLogs: [
+          "Nov 15 09:30:12 - Request created by priya.sharma@acme.internal [IP: 10.0.4.12]",
+          "Nov 15 09:30:15 - AI OCR engine completed extraction (2 attachments verified)",
+          "Nov 15 09:30:16 - Policy Rule Engine evaluated: Tier 3 (> ₹1,00,000) assigned",
+          "Nov 15 11:20:44 - Manager Arun Verma approved request [Auth: SSO-OAuth2]",
+          "Nov 15 15:45:10 - Finance Neha Gupta approved request [Auth: SSO-OAuth2]"
+        ]
+      },
+      {
+        id: "PR-2026-092",
+        title: "Ergonomic Chairs for Design Studio (x5)",
+        requester: "Kunal Mehra",
+        department: "Design",
+        amount: 42500,
+        tier: "Tier 2 (₹25k - ₹1L)",
+        category: "Office Supplies",
+        vendor: "Featherlite Workspaces",
+        status: "Missing Documents",
+        statusType: "flagged",
+        aiRiskLevel: "MEDIUM RISK",
+        aiRiskClass: "bg-amber-100 text-amber-800 border-amber-200",
+        aiSummary: [
+          "Office furniture procurement for newly onboarded UX designers.",
+          "Tier 2 threshold: requires Line Manager and Finance approval.",
+          "Missing secondary comparative quote required for purchases > ₹25,000. Blocks final approval."
+        ],
+        policyChecks: [
+          { label: "Within Q4 Facilities Budget", pass: true },
+          { label: "Valid Vendor GSTIN verified via OCR", pass: true },
+          { label: "2 Comparative vendor quotes attached", pass: false, error: "Only 1 quote attached (Featherlite). Need 2nd quote." },
+          { label: "Duplicate invoice check: Clean", pass: true }
+        ],
+        documents: [
+          { name: "Featherlite_Quote_FL-2026.pdf", size: "840 KB", ocrScore: "97.4%", status: "Verified" },
+          { name: "Missing_Second_Comparative_Quote.alert", size: "0 KB", ocrScore: "0%", status: "Missing" }
+        ],
+        workflowSteps: [
+          { role: "Line Manager", name: "Sunil Joshi", status: "Action Required", time: "Waiting", note: "Cannot approve until 2nd quote is attached." },
+          { role: "Finance Manager", name: "Neha Gupta", status: "Blocked", time: "Pending", note: "Pending missing quote submission." }
+        ],
+        auditLogs: [
+          "Nov 16 10:14:02 - Request created by kunal.mehra@acme.internal",
+          "Nov 16 10:14:04 - AI Policy Scanner flagged missing mandatory comparative quote"
+        ]
+      },
+      {
+        id: "PR-2026-094",
+        title: "Figma Enterprise License Seat Expansion (x8)",
+        requester: "Rohan Varma",
+        department: "Product",
+        amount: 85000,
+        tier: "Tier 2 (₹25k - ₹1L)",
+        category: "Cloud SaaS",
+        vendor: "Figma Inc",
+        status: "Pending Finance",
+        statusType: "pending_finance",
+        aiRiskLevel: "LOW RISK",
+        aiRiskClass: "bg-emerald-100 text-emerald-800 border-emerald-200",
+        aiSummary: [
+          "Seat expansion for 8 product managers and contractors.",
+          "Tier 2 approval route: Line Manager approved; awaiting Finance sign-off.",
+          "All invoices and contract addendums verified."
+        ],
+        policyChecks: [
+          { label: "Within Q4 Product Software Budget", pass: true },
+          { label: "Master Services Agreement (MSA) on file", pass: true },
+          { label: "Duplicate invoice check: Clean", pass: true }
+        ],
+        documents: [
+          { name: "Figma_Addendum_OrderForm_8seats.pdf", size: "1.8 MB", ocrScore: "99.5%", status: "Verified" }
+        ],
+        workflowSteps: [
+          { role: "Line Manager", name: "Arun Verma", status: "Approved", time: "Nov 16, 02:10 PM", note: "Seats verified for new hires." },
+          { role: "Finance Manager", name: "Neha Gupta", status: "Pending", time: "In Review", note: "Checking budget code." }
+        ],
+        auditLogs: [
+          "Nov 16 11:05:18 - Request created by rohan.varma@acme.internal",
+          "Nov 16 14:10:22 - Line Manager Arun Verma approved"
+        ]
+      },
+      {
+        id: "PR-2026-095",
+        title: "AWS Microservices Training Lab Hosting",
+        requester: "Priya Sharma",
+        department: "Engineering",
+        amount: 18500,
+        tier: "Tier 1 (≤ ₹25,000)",
+        category: "Cloud SaaS",
+        vendor: "Amazon Web Services India",
+        status: "Pending Manager",
+        statusType: "pending_manager",
+        aiRiskLevel: "LOW RISK",
+        aiRiskClass: "bg-emerald-100 text-emerald-800 border-emerald-200",
+        aiSummary: [
+          "Temporary cloud sandbox for internal engineering training.",
+          "Tier 1 (≤ ₹25,000): Requires only Line Manager approval.",
+          "Invoice matches monthly bill cycle. Ready for immediate 1-click clearance."
+        ],
+        policyChecks: [
+          { label: "Within Training & Development Budget", pass: true },
+          { label: "Valid AWS Tax Invoice Attached", pass: true },
+          { label: "Duplicate invoice check: Clean", pass: true }
+        ],
+        documents: [
+          { name: "AWS_Invoice_98127391.pdf", size: "620 KB", ocrScore: "99.8%", status: "Verified" }
+        ],
+        workflowSteps: [
+          { role: "Line Manager", name: "Arun Verma", status: "Action Required", time: "Awaiting", note: "Ready for your sign-off." }
+        ],
+        auditLogs: [
+          "Nov 16 16:30:10 - Request created by priya.sharma@acme.internal",
+          "Nov 16 16:30:12 - Tier 1 rule applied: routed directly to Arun Verma"
+        ]
+      },
+      {
+        id: "PR-2026-096",
+        title: "MacBook Pro M3 Max (32GB) - Priority Replacement",
+        requester: "Aman Sen",
+        department: "Engineering",
+        amount: 245000,
+        tier: "Tier 3 (> ₹1,00,000)",
+        category: "Hardware",
+        vendor: "Imagine Apple Authorized Reseller",
+        status: "Policy Risk Flagged",
+        statusType: "flagged",
+        aiRiskLevel: "HIGH RISK / DUPLICATE",
+        aiRiskClass: "bg-rose-100 text-rose-800 border-rose-200",
+        aiSummary: [
+          "CRITICAL ALERT: Serial number / Invoice # matched against PR-2026-041 from 28 days ago.",
+          "Possible duplicate submission or re-billing error detected by AI hash comparison.",
+          "High financial value (₹2,45,000). Automated block placed on final sign-off until manual audit."
+        ],
+        policyChecks: [
+          { label: "Within Q4 IT Hardware Budget", pass: true },
+          { label: "Valid Vendor GSTIN", pass: true },
+          { label: "Duplicate invoice check: FAILED (Matches PR-2026-041)", pass: false, error: "Identical invoice number INV-9921 detected." }
+        ],
+        documents: [
+          { name: "Imagine_Invoice_INV9921.pdf", size: "3.1 MB", ocrScore: "98.9%", status: "Flagged" }
+        ],
+        workflowSteps: [
+          { role: "Line Manager", name: "Arun Verma", status: "Blocked", time: "Audit Needed", note: "Duplicate invoice alert active." }
+        ],
+        auditLogs: [
+          "Nov 17 01:10:05 - Request submitted by aman.sen@acme.internal",
+          "Nov 17 01:10:07 - AI Anomaly Engine flagged hash match with historical PR-2026-041"
+        ]
+      }
+    ];
+
+    let currentRole = "manager";
+    let selectedRequest = MOCK_DATA[0];
+    let currentFilter = "all";
+
+    function init() {
+      renderTable();
+    }
+
+    function switchRole(newRole) {
+      currentRole = newRole;
+      const roleBadge = document.getElementById("roleBadge");
+      const currentPersonaName = document.getElementById("currentPersonaName");
+      const currentPersonaRole = document.getElementById("currentPersonaRole");
+
+      if (newRole === "requester") {
+        roleBadge.innerText = "Logged in: Priya Sharma (Requester / Dev)";
+        roleBadge.className = "text-xs px-2.5 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200";
+        if (currentPersonaName) currentPersonaName.innerText = "Priya Sharma";
+        if (currentPersonaRole) currentPersonaRole.innerText = "Requester";
+      } else if (newRole === "manager") {
+        roleBadge.innerText = "Logged in: Arun Verma (Line Manager - Eng)";
+        roleBadge.className = "text-xs px-2.5 py-0.5 rounded-full font-semibold bg-sky-100 text-sky-800 border border-sky-200";
+        if (currentPersonaName) currentPersonaName.innerText = "Arun Verma";
+        if (currentPersonaRole) currentPersonaRole.innerText = "Line Manager";
+      } else if (newRole === "finance") {
+        roleBadge.innerText = "Logged in: Neha Gupta (Finance Manager)";
+        roleBadge.className = "text-xs px-2.5 py-0.5 rounded-full font-semibold bg-indigo-100 text-indigo-800 border border-indigo-200";
+        if (currentPersonaName) currentPersonaName.innerText = "Neha Gupta";
+        if (currentPersonaRole) currentPersonaRole.innerText = "Finance Manager";
+      } else if (newRole === "depthead") {
+        roleBadge.innerText = "Logged in: Rajesh Patel (VP / Dept Head)";
+        roleBadge.className = "text-xs px-2.5 py-0.5 rounded-full font-semibold bg-purple-100 text-purple-800 border border-purple-200";
+        if (currentPersonaName) currentPersonaName.innerText = "Rajesh Patel";
+        if (currentPersonaRole) currentPersonaRole.innerText = "Dept Head";
+      }
+
+      renderTable();
+      if (!document.getElementById("requestModal").classList.contains("hidden")) {
+        renderModalActionButtons();
+      }
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById("requestsTableBody");
+      tbody.innerHTML = "";
+
+      const filtered = MOCK_DATA.filter(req => {
+        if (currentFilter === "pending") {
+          return req.status.includes("Pending") || req.status.includes("Action Required");
+        }
+        if (currentFilter === "flagged") {
+          return req.statusType === "flagged";
+        }
+        return true;
+      });
+
+      filtered.forEach(req => {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-50/80 transition-colors cursor-pointer border-b border-slate-100";
+        tr.onclick = () => openRequestModal(req.id);
+
+        let statusBadge = "";
+        if (req.status === "Approved") {
+          statusBadge = `<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200"><i class="fa-solid fa-check mr-1"></i>Approved</span>`;
+        } else if (req.statusType === "flagged") {
+          statusBadge = `<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-rose-100 text-rose-800 border border-rose-200"><i class="fa-solid fa-triangle-exclamation mr-1"></i>${req.status}</span>`;
+        } else {
+          statusBadge = `<span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-200"><i class="fa-regular fa-clock mr-1"></i>${req.status}</span>`;
+        }
+
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-medium">
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-xs font-bold text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded border border-sky-100">${req.id}</span>
+              <span class="text-slate-900 font-semibold hover:text-sky-600 transition-colors">${req.title}</span>
+            </div>
+            <span class="text-[10px] text-slate-400 mt-0.5 block">${req.category} • ${req.vendor}</span>
+          </td>
+          <td class="py-3 px-4">
+            <div class="font-medium text-slate-800">${req.requester}</div>
+            <div class="text-[10px] text-slate-500">${req.department}</div>
+          </td>
+          <td class="py-3 px-4">
+            <div class="font-bold text-slate-900">₹${req.amount.toLocaleString('en-IN')}</div>
+            <div class="text-[10px] text-slate-500 font-medium">${req.tier}</div>
+          </td>
+          <td class="py-3 px-4">
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full border ${req.aiRiskClass}">
+              ${req.aiRiskLevel}
+            </span>
+          </td>
+          <td class="py-3 px-4">
+            ${statusBadge}
+          </td>
+          <td class="py-3 px-4">
+            <div class="flex items-center gap-1.5 text-slate-600">
+              <i class="fa-solid fa-paperclip text-slate-400"></i>
+              <span class="font-medium">${req.documents.length} doc${req.documents.length > 1 ? 's' : ''}</span>
+              ${req.documents.some(d => d.status === "Missing" || d.status === "Flagged") 
+                ? '<i class="fa-solid fa-circle-exclamation text-rose-500 text-xs" title="Missing documents or validation alert"></i>' 
+                : '<i class="fa-solid fa-check text-emerald-500 text-xs"></i>'}
+            </div>
+          </td>
+          <td class="py-3 px-4 text-right">
+            <button class="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-200 rounded-md font-semibold text-slate-700 hover:text-sky-600 transition-colors shadow-2xs">
+              View Details <i class="fa-solid fa-chevron-right text-[10px] ml-1"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterTable(filter) {
+      currentFilter = filter;
+      document.getElementById("tabAll").className = filter === 'all' 
+        ? "px-3 py-1.5 rounded-md bg-white text-slate-900 shadow-xs transition-all" 
+        : "px-3 py-1.5 rounded-md hover:text-slate-900 transition-all";
+      document.getElementById("tabPending").className = filter === 'pending' 
+        ? "px-3 py-1.5 rounded-md bg-white text-slate-900 shadow-xs transition-all flex items-center gap-1.5" 
+        : "px-3 py-1.5 rounded-md hover:text-slate-900 transition-all flex items-center gap-1.5";
+      document.getElementById("tabFlagged").className = filter === 'flagged' 
+        ? "px-3 py-1.5 rounded-md bg-white text-slate-900 shadow-xs transition-all flex items-center gap-1.5" 
+        : "px-3 py-1.5 rounded-md hover:text-slate-900 transition-all flex items-center gap-1.5";
+      renderTable();
+    }
+
+    function openRequestModal(prId) {
+      selectedRequest = MOCK_DATA.find(r => r.id === prId) || MOCK_DATA[0];
+      
+      document.getElementById("modalPrBadge").innerText = selectedRequest.id;
+      document.getElementById("modalPrTitle").innerText = selectedRequest.title;
+      document.getElementById("modalPrSubtitle").innerText = `Submitted by ${selectedRequest.requester} • ${selectedRequest.department} • Category: ${selectedRequest.category}`;
+      document.getElementById("modalAmount").innerText = `₹${selectedRequest.amount.toLocaleString('en-IN')}`;
+      document.getElementById("modalTierBadge").innerText = selectedRequest.tier;
+      document.getElementById("modalVendor").innerText = selectedRequest.vendor;
+      
+      // AI Risk Pill
+      const riskPill = document.getElementById("modalAiRiskPill");
+      riskPill.innerText = selectedRequest.aiRiskLevel;
+      riskPill.className = `text-[10px] font-bold px-2 py-0.5 rounded-full border ${selectedRequest.aiRiskClass}`;
+
+      // AI Bullets
+      const bulletsList = document.getElementById("modalAiBullets");
+      bulletsList.innerHTML = selectedRequest.aiSummary.map(b => `<li>${b}</li>`).join("");
+
+      // Policy Checks
+      const checksList = document.getElementById("modalPolicyChecks");
+      checksList.innerHTML = selectedRequest.policyChecks.map(check => {
+        if (check.pass) {
+          return `
+            <div class="flex items-center gap-2 text-xs text-slate-700">
+              <i class="fa-solid fa-circle-check text-emerald-600 text-xs"></i>
+              <span>${check.label}</span>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="flex items-start gap-2 text-xs text-rose-700 bg-rose-50 p-2 rounded-lg border border-rose-200">
+              <i class="fa-solid fa-circle-xmark text-rose-600 text-xs mt-0.5"></i>
+              <div>
+                <strong>${check.label}</strong>
+                <p class="text-[11px] text-rose-600 mt-0.5">${check.error || "Policy condition unfulfilled."}</p>
+              </div>
+            </div>
+          `;
+        }
+      }).join("");
+
+      // Documents List
+      const docsList = document.getElementById("modalDocumentsList");
+      docsList.innerHTML = selectedRequest.documents.map(doc => `
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid ${doc.name.endsWith('.alert') ? 'fa-triangle-exclamation text-rose-500' : 'fa-file-pdf text-red-500'} text-sm"></i>
+            <div>
+              <span class="font-semibold text-slate-800">${doc.name}</span>
+              <span class="text-[10px] text-slate-400 block">${doc.size} • OCR Match: <strong class="text-sky-700">${doc.ocrScore}</strong></span>
+            </div>
+          </div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded ${doc.status === 'Verified' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+            ${doc.status}
+          </span>
+        </div>
+      `).join("");
+
+      // Workflow Timeline
+      const timeline = document.getElementById("modalWorkflowTimeline");
+      timeline.innerHTML = selectedRequest.workflowSteps.map(step => {
+        let dotColor = "bg-slate-300";
+        let statusBadge = `<span class="text-[10px] font-medium text-slate-400">${step.status}</span>`;
+        if (step.status === "Approved") {
+          dotColor = "bg-emerald-500";
+          statusBadge = `<span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">Approved</span>`;
+        } else if (step.status === "Action Required") {
+          dotColor = "bg-amber-500 ring-4 ring-amber-100";
+          statusBadge = `<span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">Action Required</span>`;
+        } else if (step.status === "Pending") {
+          dotColor = "bg-sky-500";
+          statusBadge = `<span class="text-[10px] font-bold text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded border border-sky-200">Pending</span>`;
+        } else if (step.status === "Blocked") {
+          dotColor = "bg-rose-500";
+          statusBadge = `<span class="text-[10px] font-bold text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">Blocked</span>`;
+        }
+
+        return `
+          <div class="relative">
+            <span class="absolute -left-[31px] top-0.5 w-3.5 h-3.5 rounded-full ${dotColor} border-2 border-white"></span>
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-900">${step.role}: ${step.name}</span>
+              ${statusBadge}
+            </div>
+            <p class="text-[11px] text-slate-500 mt-0.5">${step.time} • Note: "${step.note}"</p>
+          </div>
+        `;
+      }).join("");
+
+      // Audit Logs
+      const auditBox = document.getElementById("modalAuditLogs");
+      auditBox.innerHTML = selectedRequest.auditLogs.map(log => `<div>${log}</div>`).join("");
+
+      renderModalActionButtons();
+
+      document.getElementById("requestModal").classList.remove("hidden");
+    }
+
+    function renderModalActionButtons() {
+      const btnContainer = document.getElementById("modalActionButtons");
+      btnContainer.innerHTML = "";
+
+      const hasBlockers = selectedRequest.policyChecks.some(c => !c.pass);
+
+      if (currentRole === "requester") {
+        btnContainer.innerHTML = `
+          <button onclick="alert('Inquiry notification sent to active approvers via Slack.')" 
+                  class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">
+            <i class="fa-solid fa-paper-plane mr-1"></i> Ping Approver on Slack
+          </button>
+          <button onclick="closeRequestModal()" class="px-4 py-1.5 bg-sky-600 text-white rounded-lg text-xs font-bold">
+            Done
+          </button>
+        `;
+        return;
+      }
+
+      // Approver buttons
+      if (hasBlockers) {
+        btnContainer.innerHTML = `
+          <button onclick="handleRequestAction('reject')" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-bold">
+            <i class="fa-solid fa-xmark mr-1"></i> Reject Request
+          </button>
+          <button onclick="handleRequestAction('request_info')" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold shadow-2xs">
+            <i class="fa-solid fa-comment-dots mr-1"></i> Request Missing Document
+          </button>
+        `;
+      } else {
+        btnContainer.innerHTML = `
+          <button onclick="handleRequestAction('reject')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">
+            Reject
+          </button>
+          <button onclick="handleRequestAction('request_info')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">
+            Request Info
+          </button>
+          <button onclick="handleRequestAction('approve')" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm shadow-emerald-600/30 flex items-center gap-1.5">
+            <i class="fa-solid fa-check"></i>
+            <span>Approve Request (${currentRole.toUpperCase()})</span>
+          </button>
+        `;
+      }
+    }
+
+    function handleRequestAction(action) {
+      const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      if (action === 'approve') {
+        selectedRequest.status = "Approved";
+        selectedRequest.statusType = "approved";
+        selectedRequest.workflowSteps.forEach(s => {
+          if (s.name.includes("Arun") || s.name.includes("Neha") || s.name.includes("Rajesh")) {
+            s.status = "Approved";
+            s.time = `Just now (${now})`;
+          }
+        });
+        selectedRequest.auditLogs.push(`Nov 17 ${now} - Explicit Human Approval granted by ${currentRole.toUpperCase()} [Auth: Verified Session]`);
+        alert(`Success: Purchase Request ${selectedRequest.id} has been formally APPROVED by ${currentRole.toUpperCase()}. Notification dispatched to Requester and Finance.`);
+      } else if (action === 'request_info') {
+        selectedRequest.auditLogs.push(`Nov 17 ${now} - Revision/Clarification requested by ${currentRole.toUpperCase()}`);
+        alert(`Request for additional comparative quotes / clarification sent to ${selectedRequest.requester}.`);
+      } else if (action === 'reject') {
+        selectedRequest.status = "Rejected";
+        selectedRequest.statusType = "flagged";
+        selectedRequest.auditLogs.push(`Nov 17 ${now} - Request rejected by ${currentRole.toUpperCase()} [Reason: Policy non-compliance]`);
+        alert(`Request ${selectedRequest.id} marked as REJECTED. Notification sent with policy explanation.`);
+      }
+      closeRequestModal();
+      renderTable();
+    }
+
+    function closeRequestModal() {
+      document.getElementById("requestModal").classList.add("hidden");
+    }
+
+    function openNewRequestModal() {
+      document.getElementById("newRequestModal").classList.remove("hidden");
+    }
+
+    function closeNewRequestModal() {
+      document.getElementById("newRequestModal").classList.add("hidden");
+    }
+
+    function simulateAiOcrUpload() {
+      document.getElementById("ocrSuccessNotice").classList.remove("hidden");
+      document.getElementById("formTitle").value = "JetBrains All Products Pack (x4 Licenses)";
+      document.getElementById("formCategory").value = "SaaS & Cloud";
+      document.getElementById("formAmount").value = "38400";
+      document.getElementById("formVendor").value = "JetBrains s.r.o. (Czechia / India GST: 07AABCB1234F1Z9)";
+      document.getElementById("formJustification").value = "Renewing IDE subscriptions for frontend and backend engineers. Extracted directly from official invoice quotation #JB-98124.";
+      updateTierLiveFeedback(38400);
+    }
+
+    function updateTierLiveFeedback(amount) {
+      const val = parseFloat(amount);
+      const fb = document.getElementById("tierLiveFeedback");
+      if (!val || isNaN(val)) {
+        fb.innerHTML = `Rule: ≤ ₹25k Manager only | ₹25k-₹1L Manager+Finance | > ₹1L Dept Head`;
+        fb.className = "text-[10px] font-medium text-slate-500 mt-1";
+      } else if (val <= 25000) {
+        fb.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check"></i> Tier 1 (≤ ₹25,000):</span> Requires only Line Manager sign-off. Fast-track routing.`;
+        fb.className = "text-[10px] font-medium text-emerald-600 mt-1";
+      } else if (val <= 100000) {
+        fb.innerHTML = `<span class="text-blue-600 font-bold"><i class="fa-solid fa-circle-info"></i> Tier 2 (₹25,001 - ₹1,00,000):</span> Requires Line Manager AND Finance sign-off. Ensure 2 vendor quotes attached.`;
+        fb.className = "text-[10px] font-medium text-blue-600 mt-1";
+      } else {
+        fb.innerHTML = `<span class="text-purple-600 font-bold"><i class="fa-solid fa-shield-halved"></i> Tier 3 (> ₹1,00,000):</span> High-value threshold! Requires Manager, Finance, AND Department Head approval.`;
+        fb.className = "text-[10px] font-medium text-purple-600 mt-1";
+      }
+    }
+
+    function submitNewRequest(e) {
+      e.preventDefault();
+      const title = document.getElementById("formTitle").value;
+      const category = document.getElementById("formCategory").value;
+      const amount = parseFloat(document.getElementById("formAmount").value);
+      const vendor = document.getElementById("formVendor").value;
+      const justification = document.getElementById("formJustification").value;
+
+      let tierText = "Tier 1 (≤ ₹25,000)";
+      if (amount > 100000) tierText = "Tier 3 (> ₹1,00,000)";
+      else if (amount > 25000) tierText = "Tier 2 (₹25k - ₹1L)";
+
+      const newId = `PR-2026-${String(MOCK_DATA.length + 90).padStart(3, '0')}`;
+      const newReq = {
+        id: newId,
+        title: title,
+        requester: "Priya Sharma",
+        department: "Engineering",
+        amount: amount,
+        tier: tierText,
+        category: category,
+        vendor: vendor,
+        status: "Pending Manager",
+        statusType: "pending_manager",
+        aiRiskLevel: "LOW RISK",
+        aiRiskClass: "bg-emerald-100 text-emerald-800 border-emerald-200",
+        aiSummary: [
+          `New request submitted by Priya Sharma for ${category}.`,
+          `Rule evaluation: ${tierText} workflow initiated automatically.`,
+          `AI OCR verified vendor GSTIN and budget compatibility.`
+        ],
+        policyChecks: [
+          { label: "Within Q4 Departmental Budget", pass: true },
+          { label: "Valid Vendor GSTIN & Document verified", pass: true },
+          { label: "Duplicate check: Clean", pass: true }
+        ],
+        documents: [
+          { name: "Vendor_Invoice_AutoExtracted.pdf", size: "1.4 MB", ocrScore: "99.1%", status: "Verified" }
+        ],
+        workflowSteps: [
+          { role: "Line Manager", name: "Arun Verma", status: "Action Required", time: "Just submitted", note: "Awaiting initial review." }
+        ],
+        auditLogs: [
+          `Nov 17 ${new Date().toLocaleTimeString()} - Request created by Priya Sharma via Web Portal`,
+          `Nov 17 ${new Date().toLocaleTimeString()} - AI validation completed: First-Time-Right confirmed.`
+        ]
+      };
+
+      MOCK_DATA.unshift(newReq);
+      alert(`🎉 Purchase Request ${newId} created successfully! Automated SLA timer (24h) activated.`);
+      closeNewRequestModal();
+      renderTable();
+    }
+
+    // Copilot Conversational Assistant
+    function toggleCopilot() {
+      const drawer = document.getElementById("copilotDrawer");
+      drawer.classList.toggle("hidden");
+    }
+
+    function sendQuickPrompt(promptText) {
+      document.getElementById("copilotInput").value = promptText;
+      sendCopilotMessage();
+    }
+
+    function handleCopilotKey(e) {
+      if (e.key === "Enter") {
+        sendCopilotMessage();
+      }
+    }
+
+    function sendCopilotMessage() {
+      const input = document.getElementById("copilotInput");
+      const text = input.value.trim();
+      if (!text) return;
+
+      const chat = document.getElementById("copilotChat");
+
+      // User Message
+      const userBubble = document.createElement("div");
+      userBubble.className = "flex items-start justify-end gap-2";
+      userBubble.innerHTML = `
+        <div class="bg-sky-600 text-white p-2.5 rounded-xl rounded-tr-none text-xs shadow-2xs max-w-[80%]">
+          ${text}
+        </div>
+      `;
+      chat.appendChild(userBubble);
+      input.value = "";
+      chat.scrollTop = chat.scrollHeight;
+
+      // Simulate AI Copilot Response
+      setTimeout(() => {
+        let reply = "";
+        const lower = text.toLowerCase();
+
+        if (lower.includes("pr-2026-089")) {
+          reply = `<strong>PR-2026-089 (Datadog APM - ₹1,45,000):</strong><br>
+          • <strong>Current Stage:</strong> Awaiting sign-off from <em>Rajesh Patel (VP / Dept Head)</em>.<br>
+          • <strong>Prior Sign-offs:</strong> Arun Verma (Manager) approved on Nov 15, 11:20 AM; Neha Gupta (Finance) approved on Nov 15, 03:45 PM.<br>
+          • <strong>SLA Health:</strong> On track (14 hours elapsed of 24h SLA).`;
+        } else if (lower.includes("65,000") || lower.includes("tier 2") || lower.includes("approval rules")) {
+          reply = `<strong>Policy Routing for ₹65,000:</strong><br>
+          Falls under <strong>Tier 2 (₹25,001 to ₹1,00,000)</strong>.<br>
+          • <strong>Required Approvers:</strong> Line Manager AND Finance Manager.<br>
+          • <strong>Prerequisites:</strong> At least 2 competitive vendor quotes and valid GST invoice. Missing documents block final approval.`;
+        } else if (lower.includes("ai approve") || lower.includes("independently") || lower.includes("autonomous")) {
+          reply = `<strong>S3K Core Safety Rule:</strong><br>
+          <strong>No, AI never independently approves financial requests.</strong><br>
+          FlowSync AI performs OCR document extraction, budget cross-referencing, duplicate detection, and risk scoring. Final approval authority is strictly reserved for authenticated human approvers (Manager, Finance, Dept Head).`;
+        } else {
+          reply = `I parsed your query regarding <em>"${text}"</em>.<br>
+          According to Acme Corp procurement guidelines, all requests are evaluated dynamically: Tier 1 (≤ ₹25k: Manager), Tier 2 (₹25k-₹1L: Manager+Finance), and Tier 3 (> ₹1L: Manager+Finance+Dept Head). All actions are recorded in immutable audit logs with row-level security.`;
+        }
+
+        const aiBubble = document.createElement("div");
+        aiBubble.className = "flex items-start gap-2";
+        aiBubble.innerHTML = `
+          <div class="w-6 h-6 rounded-full bg-sky-600 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">
+            <i class="fa-solid fa-sparkles"></i>
+          </div>
+          <div class="bg-white p-2.5 rounded-xl rounded-tl-none border border-slate-200 shadow-2xs text-slate-800 space-y-1 max-w-[85%] text-xs">
+            ${reply}
+          </div>
+        `;
+        chat.appendChild(aiBubble);
+        chat.scrollTop = chat.scrollHeight;
+      }, 450);
+    }
+
+    // Initialize on page load
+    window.onload = init;
+  </script>
+</body>
+</html>

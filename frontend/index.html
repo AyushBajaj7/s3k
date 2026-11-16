@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BuyOps | Neumorphic Enterprise Request & Approval Platform</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    
+    :root {
+      --bg: #e6ecf2;
+      --card-bg: #e6ecf2;
+      --shadow-light: #ffffff;
+      --shadow-dark: #b8c4d0;
+      --accent: #2563eb;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg);
+      color: #334155;
+    }
+
+    code, pre, .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ======================================================= */
+    /* NEUMORPHIC CORE UTILITIES                                */
+    /* ======================================================= */
+    .neu-flat {
+      background: var(--bg);
+      box-shadow: 6px 6px 14px var(--shadow-dark), -6px -6px 14px var(--shadow-light);
+    }
+
+    .neu-flat-sm {
+      background: var(--bg);
+      box-shadow: 3px 3px 8px var(--shadow-dark), -3px -3px 8px var(--shadow-light);
+    }
+
+    .neu-convex {
+      background: linear-gradient(145deg, #f0f6fc, #dbe2e9);
+      box-shadow: 6px 6px 14px var(--shadow-dark), -6px -6px 14px var(--shadow-light);
+    }
+
+    .neu-pressed, .neu-inset {
+      background: var(--bg);
+      box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    }
+
+    .neu-pressed-deep {
+      background: var(--bg);
+      box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+    }
+
+    /* Interactive Neumorphic Buttons */
+    .neu-btn {
+      background: var(--bg);
+      box-shadow: 4px 4px 10px var(--shadow-dark), -4px -4px 10px var(--shadow-light);
+      transition: all 0.15s ease-in-out;
+    }
+
+    .neu-btn:hover {
+      box-shadow: 6px 6px 14px var(--shadow-dark), -6px -6px 14px var(--shadow-light);
+      transform: translateY(-1px);
+    }
+
+    .neu-btn:active, .neu-btn.active {
+      box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+      transform: translateY(1px);
+    }
+
+    .neu-btn-primary {
+      background: linear-gradient(145deg, #2563eb, #1d4ed8);
+      box-shadow: 4px 4px 10px #b0c0d4, -4px -4px 10px #ffffff;
+      color: #ffffff;
+      transition: all 0.15s ease-in-out;
+    }
+    .neu-btn-primary:hover {
+      box-shadow: 6px 6px 14px #a0b2c8, -6px -6px 14px #ffffff;
+      transform: translateY(-1px);
+    }
+    .neu-btn-primary:active {
+      box-shadow: inset 2px 2px 5px #172554, inset -2px -2px 5px #3b82f6;
+      transform: translateY(1px);
+    }
+
+    .neu-btn-success {
+      background: linear-gradient(145deg, #10b981, #059669);
+      box-shadow: 4px 4px 10px #b0c0d4, -4px -4px 10px #ffffff;
+      color: #ffffff;
+      transition: all 0.15s ease-in-out;
+    }
+    .neu-btn-success:hover {
+      box-shadow: 5px 5px 12px #9fc3b5, -5px -5px 12px #ffffff;
+      transform: translateY(-1px);
+    }
+    .neu-btn-success:active {
+      box-shadow: inset 2px 2px 5px #064e3b, inset -2px -2px 5px #34d399;
+      transform: translateY(1px);
+    }
+
+    .neu-btn-danger {
+      background: var(--bg);
+      color: #dc2626;
+      box-shadow: 3px 3px 8px var(--shadow-dark), -3px -3px 8px var(--shadow-light);
+      transition: all 0.15s ease-in-out;
+    }
+    .neu-btn-danger:hover {
+      box-shadow: 5px 5px 12px var(--shadow-dark), -5px -5px 12px var(--shadow-light);
+      background: #fde8e8;
+    }
+    .neu-btn-danger:active {
+      box-shadow: inset 2px 2px 5px #f8b4b4, inset -2px -2px 5px #ffffff;
+    }
+
+    .neu-input {
+      background: var(--bg);
+      box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+    }
+    .neu-input:focus {
+      outline: none;
+      border-color: #93c5fd;
+      box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light), 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #c5cbd3;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row antialiased select-none custom-scrollbar overflow-x-hidden">
+
+  <!-- ========================================================================= -->
+  <!-- NEUMORPHIC TOAST NOTIFICATION CONTAINER (Replaces ugly browser alerts!)   -->
+  <!-- ========================================================================= -->
+  <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+  <!-- ========================================================================= -->
+  <!-- LEFT SIDEBAR                                                              -->
+  <!-- ========================================================================= -->
+  <aside class="w-full md:w-64 p-6 flex flex-col justify-between shrink-0 min-h-screen border-r border-[#dbe3eb]/50">
+    
+    <div>
+      <!-- Brand Logo in Convex Neumorphic Pill -->
+      <div class="flex items-center gap-3 px-3 py-3 mb-8 rounded-2xl neu-convex cursor-pointer">
+        <div class="w-9 h-9 rounded-xl neu-btn-primary flex items-center justify-center font-bold text-sm shadow-md">
+          <i class="fa-solid fa-shapes text-sm"></i>
+        </div>
+        <div>
+          <span class="font-extrabold text-base tracking-tight text-slate-800">BuyOps<span class="text-blue-600">.ai</span></span>
+          <span class="block text-[10px] font-bold text-slate-400 -mt-0.5 uppercase tracking-wider">Neumorphic SaaS</span>
+        </div>
+        <span class="ml-auto text-[9px] font-black px-2 py-0.5 rounded-full neu-pressed text-emerald-600 uppercase">Live</span>
+      </div>
+
+      <!-- Nav Section: MAIN -->
+      <div class="mb-6">
+        <span class="px-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Navigation</span>
+        <nav class="mt-3 space-y-2 text-xs font-bold text-slate-600">
+          <button onclick="switchSidebarView('overview')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl neu-btn hover:text-blue-600 transition-colors text-left">
+            <i class="fa-solid fa-border-all w-4 text-slate-400"></i>
+            <span>Overview</span>
+          </button>
+          
+          <button onclick="switchSidebarView('requests')" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl neu-btn hover:text-blue-600 transition-colors text-left">
+            <div class="flex items-center gap-3">
+              <i class="fa-regular fa-file-lines w-4 text-slate-400"></i>
+              <span>Purchase Requests</span>
+            </div>
+            <span class="text-[10px] neu-pressed px-2 py-0.5 rounded-full font-black text-slate-700" id="sidebarPrCount">12</span>
+          </button>
+
+          <button onclick="switchSidebarView('approvals')" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl neu-pressed text-blue-600 font-extrabold transition-colors text-left">
+            <div class="flex items-center gap-3">
+              <i class="fa-regular fa-circle-check w-4 text-blue-600"></i>
+              <span>Approvals</span>
+            </div>
+            <span class="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-full font-black shadow-xs" id="sidebarApprovalCount">3</span>
+          </button>
+
+          <button onclick="showToast('Purchase Orders archive synchronized with ERP.', 'info')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl neu-btn hover:text-blue-600 transition-colors text-left">
+            <i class="fa-solid fa-cart-shopping w-4 text-slate-400"></i>
+            <span>Purchase Orders</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Nav Section: FINANCE & GOVERNANCE -->
+      <div class="mb-6">
+        <span class="px-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Finance & Controls</span>
+        <nav class="mt-3 space-y-2 text-xs font-bold text-slate-600">
+          <button onclick="openBudgetModal()" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl neu-btn hover:text-blue-600 transition-colors text-left">
+            <i class="fa-regular fa-credit-card w-4 text-slate-400"></i>
+            <span>Department Budgets</span>
+          </button>
+          <button onclick="openUatModal()" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl neu-btn hover:text-blue-600 transition-colors text-left">
+            <i class="fa-solid fa-vial-circle-check w-4 text-emerald-600"></i>
+            <span>UAT Test Matrix</span>
+          </button>
+          <button onclick="showToast('Immutable audit trail: 100% SHA-256 verified records.', 'success')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl neu-btn hover:text-blue-600 transition-colors text-left">
+            <i class="fa-solid fa-fingerprint w-4 text-slate-400"></i>
+            <span>Audit Trail (RLS)</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Sidebar Bottom: Settings & Neumorphic Persona Switcher -->
+    <div class="pt-4 space-y-3">
+      <!-- Persona Switcher Card -->
+      <div class="p-3 rounded-2xl neu-flat">
+        <span class="text-[9px] font-black uppercase tracking-wider text-slate-400 block mb-1">Active Persona (RLS)</span>
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl neu-convex text-blue-700 flex items-center justify-center font-black text-xs shrink-0" id="userAvatar">
+            MA
+          </div>
+          <div class="overflow-hidden flex-1">
+            <select id="sidebarRoleSelect" onchange="changePersona(this.value)" 
+                    class="w-full text-xs font-extrabold text-slate-800 bg-transparent focus:outline-none cursor-pointer">
+              <option value="manager" selected>Mike Anderson (Mgr)</option>
+              <option value="requester">Sarah Chen (Requester)</option>
+              <option value="finance">Neha Gupta (Finance)</option>
+              <option value="depthead">Rajesh Patel (Dept Head)</option>
+            </select>
+            <p class="text-[10px] text-slate-500 font-semibold truncate" id="userRoleSub">admin • Engineering Lead</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- S3K Governance Rule Badge -->
+      <div class="p-2.5 rounded-xl neu-pressed text-[10px] text-slate-600 space-y-1">
+        <div class="font-extrabold text-slate-800 flex items-center gap-1.5">
+          <i class="fa-solid fa-shield-halved text-amber-500"></i>
+          <span>S3K Core Principle</span>
+        </div>
+        <p class="text-[10px] text-slate-500 leading-tight">AI Assisted – Human Governed. AI never independently approves financial requests.</p>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ========================================================================= -->
+  <!-- MAIN WORKSPACE CONTENT                                                    -->
+  <!-- ========================================================================= -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-y-auto custom-scrollbar p-5 md:p-8">
+
+    <!-- Top Navigation Bar -->
+    <header class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+      
+      <!-- Search Input in Neumorphic Inset -->
+      <div class="relative w-full sm:w-96">
+        <i class="fa-solid fa-magnifying-glass absolute left-4 top-3 text-xs text-slate-400"></i>
+        <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search by name, ID, vendor... (or press ⌘ K)" 
+               class="w-full pl-10 pr-12 py-2 text-xs rounded-xl neu-input font-medium text-slate-700">
+        <span class="absolute right-3 top-2.5 text-[10px] font-mono font-bold text-slate-400 px-1.5 py-0.5 rounded neu-pressed">⌘ K</span>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+        
+        <!-- New Request Button -->
+        <button onclick="openNewRequestModal()" class="px-4 py-2 neu-btn-primary rounded-xl text-xs font-bold flex items-center gap-2">
+          <i class="fa-solid fa-plus text-xs"></i>
+          <span>New Purchase Request</span>
+        </button>
+
+        <!-- Notification Bell -->
+        <button onclick="showToast('No unread policy alerts. System healthy.', 'info')" class="w-9 h-9 rounded-xl neu-btn text-slate-500 hover:text-slate-800 flex items-center justify-center relative">
+          <i class="fa-regular fa-bell text-xs"></i>
+          <span class="absolute top-2 right-2 w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
+        </button>
+
+        <!-- UAT Matrix Pill -->
+        <button onclick="openUatModal()" class="w-9 h-9 rounded-xl neu-btn text-slate-500 hover:text-emerald-600 flex items-center justify-center" title="Open UAT Verification Suite">
+          <i class="fa-solid fa-vial text-xs"></i>
+        </button>
+
+      </div>
+
+    </header>
+
+    <!-- Main Approvals View Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div>
+        <h1 class="text-2xl font-black text-slate-800 tracking-tight">Approvals Workspace</h1>
+        <p class="text-xs text-slate-500 mt-0.5 font-medium">Review and approve purchase requests awaiting your decision • S3K Case Study 03</p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button onclick="sortByOldestFirst()" class="px-3.5 py-1.5 neu-btn rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900">
+          <i class="fa-solid fa-arrow-down-short-wide text-[10px] mr-1.5"></i> Review oldest first
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter Pills Row in Neumorphic Styling -->
+    <div class="flex flex-wrap items-center gap-3 mb-6 text-xs font-bold">
+      <button onclick="setTabFilter('pending')" id="tabPending" class="px-4 py-2 rounded-xl neu-pressed text-blue-600 font-extrabold flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+        <span>Pending (<span id="countPending">3</span>)</span>
+      </button>
+      <button onclick="setTabFilter('approved')" id="tabApproved" class="px-4 py-2 rounded-xl neu-btn text-slate-600 hover:text-slate-900 flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span>Approved (<span id="countApproved">1</span>)</span>
+      </button>
+      <button onclick="setTabFilter('rejected')" id="tabRejected" class="px-4 py-2 rounded-xl neu-btn text-slate-600 hover:text-slate-900 flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+        <span>Rejected / Flagged (<span id="countRejected">1</span>)</span>
+      </button>
+      <button onclick="setTabFilter('all')" id="tabAll" class="px-4 py-2 rounded-xl neu-btn text-slate-600 hover:text-slate-900">
+        <span>All (<span id="countAll">5</span>)</span>
+      </button>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- THREE TOP NEUMORPHIC KPI METRIC CARDS                                     -->
+    <!-- ========================================================================= -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      
+      <!-- Card 1: Approval Status (Donut & Breakdown) -->
+      <div class="p-6 rounded-2xl neu-flat flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500">Approval Status</span>
+          <span class="text-[10px] font-bold neu-pressed px-2 py-0.5 rounded-full text-slate-600" id="approvalActionRequiredBadge">3 require action</span>
+        </div>
+
+        <div class="flex items-center justify-between gap-4 my-2">
+          <!-- Neumorphic Donut Chart SVG -->
+          <div class="relative w-20 h-20 shrink-0">
+            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+              <path class="text-slate-300/40" stroke-width="4" stroke="currentColor" fill="none"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+              <path class="text-rose-500" stroke-dasharray="15, 100" stroke-width="4" stroke="currentColor" fill="none"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+              <path class="text-amber-500" stroke-dashoffset="-15" stroke-dasharray="73, 100" stroke-width="4" stroke="currentColor" fill="none"
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+            </svg>
+            <div class="absolute inset-0 flex items-center justify-center font-black text-xs text-slate-800">
+              73%
+            </div>
+          </div>
+
+          <!-- Legend -->
+          <div class="space-y-1.5 text-xs flex-1">
+            <div class="flex items-center justify-between text-slate-600">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 neu-flat-sm"></span> Pending</span>
+              <span class="font-extrabold text-slate-800" id="donutPending">3</span>
+            </div>
+            <div class="flex items-center justify-between text-slate-600">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-600 neu-flat-sm"></span> Approved</span>
+              <span class="font-extrabold text-slate-800" id="donutApproved">1</span>
+            </div>
+            <div class="flex items-center justify-between text-slate-600">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 neu-flat-sm"></span> Rejected</span>
+              <span class="font-extrabold text-slate-800" id="donutRejected">1</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-500 font-medium">Average decision latency: <strong class="text-blue-600 font-bold">18.4 hrs</strong></p>
+      </div>
+
+      <!-- Card 2: Pending Value & Department Split -->
+      <div class="p-6 rounded-2xl neu-flat flex flex-col justify-between">
+        <div>
+          <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500">Pending Value</span>
+          <div class="text-2xl font-black text-slate-800 tracking-tight mt-1" id="pendingValueDisplay">₹2,42,500</div>
+        </div>
+
+        <div class="space-y-2 mt-4">
+          <!-- Neumorphic Inset Progress Bar -->
+          <div class="w-full h-3 rounded-full neu-pressed flex overflow-hidden p-0.5">
+            <div class="bg-emerald-500 h-full rounded-full w-[10%]" title="IT: 10%"></div>
+            <div class="bg-blue-600 h-full rounded-full w-[70%] ml-0.5" title="Marketing: 70%"></div>
+            <div class="bg-purple-500 h-full rounded-full w-[20%] ml-0.5" title="Office: 20%"></div>
+          </div>
+
+          <div class="flex items-center justify-between text-[10px] text-slate-500 font-bold pt-1">
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> IT (10%)</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-600"></span> Mktg (70%)</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-500"></span> Office (20%)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Session Throughput & Baseline Delta -->
+      <div class="p-6 rounded-2xl neu-flat flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500">This Session</span>
+          <span class="text-[10px] font-bold text-emerald-600 bg-emerald-100/60 px-2 py-0.5 rounded-full neu-flat-sm">
+            <i class="fa-solid fa-arrow-trend-down"></i> -84% TAT
+          </span>
+        </div>
+
+        <div class="flex items-center justify-between my-2">
+          <!-- Radial Arc Meter -->
+          <div class="flex flex-col items-center justify-center">
+            <div class="w-20 h-10 border-t-8 border-l-8 border-r-8 border-blue-600 rounded-t-full relative flex items-center justify-center neu-pressed">
+              <span class="text-xs font-black text-slate-800 absolute top-2">42%</span>
+            </div>
+            <span class="text-[9px] uppercase tracking-wider text-slate-400 font-extrabold mt-1">Reviewed</span>
+          </div>
+
+          <div class="space-y-1.5 text-right">
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-400">Approved</span>
+              <p class="text-base font-black text-slate-800">10</p>
+            </div>
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-400">Remaining</span>
+              <p class="text-base font-black text-slate-500">12</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-500 font-medium">Incomplete rate dropped: <strong class="text-emerald-600">28% → 3.2%</strong></p>
+      </div>
+
+    </div>
+
+    <!-- Secondary Filter & Sort Toolbar -->
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div class="flex items-center gap-3 flex-1 min-w-[280px]">
+        <div class="relative flex-1 max-w-sm">
+          <i class="fa-solid fa-filter absolute left-3.5 top-2.5 text-xs text-slate-400"></i>
+          <input type="text" id="filterInput" oninput="handleFilter(this.value)" placeholder="Filter active feed..." 
+                 class="w-full pl-9 pr-4 py-1.5 text-xs rounded-xl neu-input font-medium text-slate-700">
+        </div>
+        
+        <select id="sortSelect" onchange="handleSort(this.value)" class="text-xs rounded-xl neu-btn px-3 py-1.5 font-bold text-slate-600 focus:outline-none cursor-pointer">
+          <option value="longest">Sort: Wait time (Longest)</option>
+          <option value="amount_desc">Sort: Amount (High to Low)</option>
+          <option value="amount_asc">Sort: Amount (Low to High)</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSelectAll()" id="btnSelectAll" class="text-xs font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 px-3 py-1.5 rounded-xl neu-btn">
+          <i class="fa-regular fa-square text-slate-400" id="iconSelectAll"></i>
+          <span>Select all</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- REQUEST CARDS FEED                                                        -->
+    <!-- ========================================================================= -->
+    <div id="requestsFeed" class="space-y-6">
+      <!-- Injected via JavaScript -->
+    </div>
+
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- FLOATING NEUMORPHIC AI COPILOT BUTTON                                     -->
+  <!-- ========================================================================= -->
+  <div class="fixed bottom-6 right-6 z-40">
+    <button onclick="toggleCopilotModal()" 
+            class="flex items-center gap-2.5 px-4 py-3 neu-btn-primary rounded-full shadow-lg hover:scale-105 transition-all text-xs font-extrabold">
+      <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+      <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+      <span>AI Policy & Status Copilot</span>
+    </button>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: Request Details & AI Analysis Drawer                               -->
+  <!-- ========================================================================= -->
+  <div id="detailModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="neu-convex rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-white/50 animate-in fade-in zoom-in-95 duration-150">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 flex items-center justify-between border-b border-slate-300/40">
+        <div class="flex items-center gap-3">
+          <span id="detailId" class="text-xs font-mono font-black px-2.5 py-1 neu-pressed text-blue-700 rounded-lg">PR-1042</span>
+          <h3 id="detailTitle" class="text-sm font-extrabold text-slate-800">Cloud Server Licenses</h3>
+        </div>
+        <button onclick="closeDetailModal()" class="w-8 h-8 rounded-xl neu-btn text-slate-500 hover:text-slate-800 flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-5 text-xs">
+        
+        <!-- Metadata 4-Box Row -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-2xl neu-pressed">
+          <div>
+            <span class="text-[9px] uppercase font-black text-slate-400">Total Amount</span>
+            <p id="detailAmount" class="text-base font-black text-slate-900 mt-0.5">₹12,500</p>
+          </div>
+          <div>
+            <span class="text-[9px] uppercase font-black text-slate-400">Tier Matrix</span>
+            <p id="detailTier" class="text-xs font-bold text-slate-800 mt-0.5">Tier 1 (≤ ₹25,000)</p>
+          </div>
+          <div>
+            <span class="text-[9px] uppercase font-black text-slate-400">Requester</span>
+            <p id="detailRequester" class="text-xs font-bold text-slate-800 mt-0.5">Sarah Chen (IT)</p>
+          </div>
+          <div>
+            <span class="text-[9px] uppercase font-black text-slate-400">Vendor</span>
+            <p id="detailVendor" class="text-xs font-bold text-slate-800 mt-0.5">AWS India</p>
+          </div>
+        </div>
+
+        <!-- AI Synthesis Box -->
+        <div class="p-5 rounded-2xl neu-flat space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="font-extrabold text-xs text-slate-800 flex items-center gap-2">
+              <div class="w-6 h-6 rounded-lg neu-btn-primary flex items-center justify-center text-xs">
+                <i class="fa-solid fa-brain"></i>
+              </div>
+              <span>AI Risk & Policy Synthesis</span>
+            </span>
+            <span id="detailRiskBadge" class="text-[10px] font-black px-2.5 py-0.5 rounded-full neu-pressed text-emerald-700">LOW RISK</span>
+          </div>
+          <ul id="detailAiBullets" class="space-y-1.5 text-slate-700 pl-4 list-disc text-xs leading-relaxed"></ul>
+        </div>
+
+        <!-- Attached Documents & OCR -->
+        <div>
+          <span class="text-[10px] uppercase font-black text-slate-400 tracking-wider">Supporting Documents & OCR Match</span>
+          <div id="detailDocsList" class="space-y-2.5 mt-2"></div>
+        </div>
+
+        <!-- Audit History -->
+        <div>
+          <span class="text-[10px] uppercase font-black text-slate-400 tracking-wider">Immutable Audit History (SHA-256)</span>
+          <div id="detailAuditTrail" class="mt-2 space-y-1.5 font-mono text-[11px] text-slate-600 max-h-36 overflow-y-auto custom-scrollbar p-3 rounded-xl neu-pressed"></div>
+        </div>
+
+      </div>
+
+      <!-- Action Footer -->
+      <div class="px-6 py-4 border-t border-slate-300/40 flex items-center justify-between">
+        <span class="text-[11px] text-slate-500 font-bold">Logged in as: <strong id="modalUserRoleDisplay" class="text-blue-600">Mike Anderson (Manager)</strong></span>
+        <div class="flex items-center gap-3" id="modalActionsGroup"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: Create New Request                                                 -->
+  <!-- ========================================================================= -->
+  <div id="newRequestModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="neu-convex rounded-3xl w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-white/50 animate-in fade-in zoom-in-95 duration-150">
+      
+      <div class="px-6 py-4 border-b border-slate-300/40 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl neu-btn-primary flex items-center justify-center text-xs">
+            <i class="fa-solid fa-file-circle-plus"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-black text-slate-800">New Purchase Request</h3>
+            <p class="text-[11px] text-slate-500">Automated OCR and First-Time-Right validation enabled</p>
+          </div>
+        </div>
+        <button onclick="closeNewRequestModal()" class="w-8 h-8 rounded-xl neu-btn text-slate-500 hover:text-slate-800 flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleCreateRequest(event)" class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-4 text-xs">
+        
+        <!-- Simulate AI Ingestion Demo Banner -->
+        <div class="p-3.5 rounded-2xl neu-flat flex items-center justify-between">
+          <div>
+            <p class="font-bold text-slate-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i>
+              <span>Quick OCR Auto-Fill Demo</span>
+            </p>
+            <p class="text-[11px] text-slate-500 mt-0.5">Simulate PDF invoice OCR scan to fill fields automatically.</p>
+          </div>
+          <button type="button" onclick="autoFillSampleData()" class="px-3 py-1.5 neu-btn rounded-xl font-black text-[11px] text-blue-600 hover:text-blue-700">
+            ⚡ Scan Invoice
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Title *</label>
+            <input type="text" id="newTitle" required placeholder="e.g. JetBrains Licenses" class="w-full px-3 py-2 rounded-xl neu-input font-medium text-slate-800">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Category *</label>
+            <select id="newCategory" class="w-full px-3 py-2 rounded-xl neu-input font-medium text-slate-800">
+              <option value="Cloud SaaS">Cloud SaaS</option>
+              <option value="Hardware">Hardware</option>
+              <option value="Office Equipment">Office Equipment</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Amount (₹ INR) *</label>
+            <input type="number" id="newAmount" required placeholder="35000" oninput="showTierHint(this.value)" class="w-full px-3 py-2 rounded-xl neu-input font-medium text-slate-800">
+            <span id="tierHint" class="text-[10px] text-slate-500 mt-1 block font-medium">Tier 1: ≤ ₹25k | Tier 2: ₹25k-₹1L | Tier 3: > ₹1L</span>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Vendor *</label>
+            <input type="text" id="newVendor" required placeholder="e.g. JetBrains s.r.o." class="w-full px-3 py-2 rounded-xl neu-input font-medium text-slate-800">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Business Justification *</label>
+          <textarea id="newJustification" rows="2" required placeholder="Describe project necessity for Q2 deliverables..." class="w-full px-3 py-2 rounded-xl neu-input font-medium text-slate-800"></textarea>
+        </div>
+
+        <div class="flex items-center gap-2.5 p-3 rounded-xl neu-pressed">
+          <input type="checkbox" id="twoQuotesCheck" checked class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer">
+          <label for="twoQuotesCheck" class="text-slate-700 font-bold cursor-pointer">Attached at least 2 competitive vendor quotes (mandatory for > ₹25,000)</label>
+        </div>
+
+        <div class="pt-3 border-t border-slate-300/40 flex items-center justify-end gap-3">
+          <button type="button" onclick="closeNewRequestModal()" class="px-4 py-2 neu-btn rounded-xl text-slate-600 font-bold">Cancel</button>
+          <button type="submit" class="px-5 py-2 neu-btn-primary rounded-xl font-bold">Submit Request</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: Department Budgets Overview                                        -->
+  <!-- ========================================================================= -->
+  <div id="budgetModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="neu-convex rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-white/50 p-6 space-y-5 animate-in fade-in zoom-in-95 duration-150">
+      <div class="flex items-center justify-between border-b border-slate-300/40 pb-3">
+        <h3 class="text-sm font-black text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-wallet text-blue-600"></i> Department Budget Utilization
+        </h3>
+        <button onclick="closeBudgetModal()" class="w-8 h-8 rounded-xl neu-btn text-slate-500 flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div class="p-4 rounded-2xl neu-flat space-y-2">
+          <div class="flex items-center justify-between font-bold">
+            <span>Engineering (Cost Center 402)</span>
+            <span class="text-blue-600">76% Utilized</span>
+          </div>
+          <div class="w-full h-2.5 rounded-full neu-pressed p-0.5">
+            <div class="bg-blue-600 h-full rounded-full w-[76%]"></div>
+          </div>
+          <div class="flex justify-between text-[11px] text-slate-500 font-medium">
+            <span>Used: ₹3,80,000</span>
+            <span class="text-emerald-600 font-bold">Remaining: ₹1,20,000</span>
+            <span>Total: ₹5,00,000</span>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl neu-flat space-y-2">
+          <div class="flex items-center justify-between font-bold">
+            <span>Marketing (Cost Center 201)</span>
+            <span class="text-purple-600">70% Utilized</span>
+          </div>
+          <div class="w-full h-2.5 rounded-full neu-pressed p-0.5">
+            <div class="bg-purple-600 h-full rounded-full w-[70%]"></div>
+          </div>
+          <div class="flex justify-between text-[11px] text-slate-500 font-medium">
+            <span>Used: ₹2,10,000</span>
+            <span class="text-emerald-600 font-bold">Remaining: ₹90,000</span>
+            <span>Total: ₹3,00,000</span>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl neu-flat space-y-2">
+          <div class="flex items-center justify-between font-bold">
+            <span>IT Infrastructure (Cost Center 105)</span>
+            <span class="text-emerald-600">78% Utilized</span>
+          </div>
+          <div class="w-full h-2.5 rounded-full neu-pressed p-0.5">
+            <div class="bg-emerald-600 h-full rounded-full w-[78%]"></div>
+          </div>
+          <div class="flex justify-between text-[11px] text-slate-500 font-medium">
+            <span>Used: ₹1,56,000</span>
+            <span class="text-emerald-600 font-bold">Remaining: ₹44,000</span>
+            <span>Total: ₹2,00,000</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-right">
+        <button onclick="closeBudgetModal()" class="px-5 py-2 neu-btn-primary rounded-xl text-xs font-bold">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: UAT Test Matrix Suite                                              -->
+  <!-- ========================================================================= -->
+  <div id="uatModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="neu-convex rounded-3xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-white/50 p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+      <div class="flex items-center justify-between border-b border-slate-300/40 pb-3">
+        <h3 class="text-sm font-black text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-vial-circle-check text-emerald-600"></i> S3K Automated UAT Matrix Results
+        </h3>
+        <button onclick="closeUatModal()" class="w-8 h-8 rounded-xl neu-btn text-slate-500 flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 overflow-y-auto custom-scrollbar flex-1 text-xs">
+        <div class="p-3.5 rounded-xl neu-flat flex items-start justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-mono font-bold text-blue-600">UAT-01</span>
+              <strong class="text-slate-800">Unauthorized Access Defense (IDOR / BOLA)</strong>
+            </div>
+            <p class="text-slate-500 mt-1">Requester B (Lisa Park) queries Requester A's (Sarah Chen) request PR-1042.</p>
+            <p class="text-emerald-600 font-bold mt-0.5">Response: HTTP 403 Forbidden. Zero confidential data leaked.</p>
+          </div>
+          <span class="text-[10px] font-black px-2.5 py-1 rounded-full neu-pressed text-emerald-700 shrink-0">100% PASSED</span>
+        </div>
+
+        <div class="p-3.5 rounded-xl neu-flat flex items-start justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-mono font-bold text-blue-600">UAT-02</span>
+              <strong class="text-slate-800">Missing Document Approval Gatekeeper</strong>
+            </div>
+            <p class="text-slate-500 mt-1">PR-1045 has only 1 vendor quote for ₹42,500. Approver clicks Approve.</p>
+            <p class="text-emerald-600 font-bold mt-0.5">Response: HTTP 422 Blocked. Missing quote blocks final approval.</p>
+          </div>
+          <span class="text-[10px] font-black px-2.5 py-1 rounded-full neu-pressed text-emerald-700 shrink-0">100% PASSED</span>
+        </div>
+
+        <div class="p-3.5 rounded-xl neu-flat flex items-start justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-mono font-bold text-blue-600">UAT-03</span>
+              <strong class="text-slate-800">Tier 3 Spend Multi-Stage Governance</strong>
+            </div>
+            <p class="text-slate-500 mt-1">PR-1044 for ₹1,45,000 (Datadog APM). Requires Manager, Finance, and Dept Head.</p>
+            <p class="text-emerald-600 font-bold mt-0.5">Response: PO release blocked until Dept Head Rajesh Patel approves.</p>
+          </div>
+          <span class="text-[10px] font-black px-2.5 py-1 rounded-full neu-pressed text-emerald-700 shrink-0">100% PASSED</span>
+        </div>
+
+        <div class="p-3.5 rounded-xl neu-flat flex items-start justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-mono font-bold text-blue-600">UAT-04</span>
+              <strong class="text-slate-800">AI Duplicate Invoice Fraud Detection</strong>
+            </div>
+            <p class="text-slate-500 mt-1">Invoice with identical amount and vendor hash submitted within 30 days.</p>
+            <p class="text-emerald-600 font-bold mt-0.5">Response: Flagged as CRITICAL RISK. AI refuses automated approval.</p>
+          </div>
+          <span class="text-[10px] font-black px-2.5 py-1 rounded-full neu-pressed text-emerald-700 shrink-0">100% PASSED</span>
+        </div>
+      </div>
+
+      <div class="text-right pt-2 border-t border-slate-300/40">
+        <button onclick="closeUatModal()" class="px-5 py-2 neu-btn-primary rounded-xl text-xs font-bold">Close Suite</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- FLOATING COPILOT CHAT DRAWER                                              -->
+  <!-- ========================================================================= -->
+  <div id="copilotModal" class="fixed bottom-20 right-6 w-96 max-w-[calc(100vw-3rem)] neu-convex rounded-3xl shadow-2xl overflow-hidden z-40 hidden flex flex-col h-[520px] border border-white/50 animate-in slide-in-from-bottom-5 duration-150">
+    
+    <div class="p-4 flex items-center justify-between border-b border-slate-300/40 bg-white/40">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl neu-btn-primary flex items-center justify-center font-bold text-xs">
+          <i class="fa-solid fa-brain"></i>
+        </div>
+        <div>
+          <h4 class="font-black text-xs text-slate-800">BuyOps AI Policy Copilot</h4>
+          <span class="text-[10px] text-slate-500 font-medium">Context-grounded procurement advice</span>
+        </div>
+      </div>
+      <button onclick="toggleCopilotModal()" class="w-7 h-7 rounded-lg neu-btn text-slate-500 hover:text-slate-800 flex items-center justify-center">
+        <i class="fa-solid fa-xmark text-xs"></i>
+      </button>
+    </div>
+
+    <div id="copilotChatArea" class="flex-1 p-4 overflow-y-auto custom-scrollbar space-y-3 text-xs">
+      <div class="p-3.5 rounded-2xl neu-flat text-slate-700 space-y-1.5">
+        <p class="font-extrabold text-slate-800">Hello! I am your procurement copilot.</p>
+        <p class="text-[11px] text-slate-500">Ask about approval policies, check request status, or explore rule tiers:</p>
+        <div class="flex flex-wrap gap-1.5 pt-1">
+          <button onclick="askCopilot('What is the status of PR-1042?')" class="text-[10px] neu-btn font-bold text-slate-700 px-2 py-1 rounded-lg">PR-1042 status</button>
+          <button onclick="askCopilot('What is the rule for purchases over ₹1,00,000?')" class="text-[10px] neu-btn font-bold text-slate-700 px-2 py-1 rounded-lg">Tier 3 rules</button>
+          <button onclick="askCopilot('Can AI approve a purchase independently?')" class="text-[10px] neu-btn font-bold text-slate-700 px-2 py-1 rounded-lg">Can AI approve?</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-3 border-t border-slate-300/40 flex items-center gap-2 bg-white/30">
+      <input type="text" id="copilotInputText" onkeydown="if(event.key==='Enter') sendCopilotMsg()" placeholder="Ask about approval rules or request status..." 
+             class="flex-1 px-3.5 py-2 rounded-xl neu-input text-xs font-medium text-slate-800">
+      <button onclick="sendCopilotMsg()" class="w-9 h-9 rounded-xl neu-btn-primary flex items-center justify-center text-xs">
+        <i class="fa-solid fa-arrow-up"></i>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- JAVASCRIPT APP LOGIC (With Custom Neumorphic Toast Alerts)                 -->
+  <!-- ========================================================================= -->
+  <script>
+    const API_BASE = "http://127.0.0.1:8000/api/v1";
+
+    let requestsData = [
+      {
+        id: "PR-1042",
+        title: "Cloud Server Licenses",
+        category: "IT",
+        vendor: "AWS India",
+        requester_name: "Sarah Chen",
+        requester_id: "u1",
+        avatar: "SC",
+        date: "Feb 18, 2025",
+        priority: "High Priority",
+        amount: 12500,
+        waiting_days: 2,
+        status: "PENDING_MANAGER",
+        status_tab: "pending",
+        tier: "Tier 1 (≤ ₹25,000)",
+        justification: "Current servers reaching capacity. Need additional licenses for Q2 scaling.",
+        budget: {
+          name: "Engineering Budget Impact",
+          used: 156000,
+          remaining: 44000,
+          total: 200000,
+          percent: 78
+        },
+        stepper: [
+          { role: "Team Lead", name: "Mark Wilson", date: "Feb 18", state: "done" },
+          { role: "Manager", name: "You", date: "Pending", state: "active" },
+          { role: "Finance", name: "CFO", date: "Tier 1 (Bypassed)", state: "bypassed" }
+        ],
+        aiRisk: "LOW RISK",
+        aiSummary: [
+          "EC2 compute expansion for IT team; amount ₹12,500 falls strictly under Tier 1 (≤ ₹25,000).",
+          "Requires only Line Manager approval; Finance/Dept Head bypassed per policy.",
+          "OCR matched vendor invoice with 99.4% confidence."
+        ],
+        documents: [
+          { name: "AWS_Invoice_INV-9821.pdf", match: "99.4% OCR Confirmed" }
+        ],
+        audit: [
+          "Feb 18 10:15 - Request created by Sarah Chen",
+          "Feb 18 10:30 - Team Lead Mark Wilson approved"
+        ]
+      },
+      {
+        id: "PR-1043",
+        title: "Marketing Analytics Platform (HubSpot)",
+        category: "Marketing",
+        vendor: "HubSpot Ireland",
+        requester_name: "Lisa Park",
+        requester_id: "u2",
+        avatar: "LP",
+        date: "Feb 17, 2025",
+        priority: "Medium",
+        amount: 85000,
+        waiting_days: 1,
+        status: "PENDING_FINANCE",
+        status_tab: "pending",
+        tier: "Tier 2 (₹25k - ₹1L)",
+        justification: "Annual seat expansion for campaign lifecycle automation and lead scoring.",
+        budget: {
+          name: "Marketing Budget Impact",
+          used: 210000,
+          remaining: 90000,
+          total: 300000,
+          percent: 70
+        },
+        stepper: [
+          { role: "Manager", name: "Arun Verma", date: "Feb 17", state: "done" },
+          { role: "Finance", name: "Neha Gupta", date: "In Review", state: "active" }
+        ],
+        aiRisk: "LOW RISK",
+        aiSummary: [
+          "HubSpot annual license renewal of ₹85,000 falls in Tier 2 (₹25k - ₹1L).",
+          "Manager Arun Verma approved; Finance Neha Gupta review active.",
+          "Two comparative quotes provided (HubSpot vs Salesforce). 3-way match verified."
+        ],
+        documents: [
+          { name: "HubSpot_Quote_Q901.pdf", match: "98.7% OCR Verified" },
+          { name: "Salesforce_Comparison.pdf", match: "97.9% OCR Verified" }
+        ],
+        audit: [
+          "Feb 17 09:12 - Request created by Lisa Park",
+          "Feb 17 14:15 - Line Manager approved"
+        ]
+      },
+      {
+        id: "PR-1044",
+        title: "Datadog Enterprise APM Subscription",
+        category: "Engineering",
+        vendor: "Datadog Singapore",
+        requester_name: "Priya Sharma",
+        requester_id: "u3",
+        avatar: "PS",
+        date: "Feb 15, 2025",
+        priority: "High Priority",
+        amount: 145000,
+        waiting_days: 3,
+        status: "PENDING_DEPTHEAD",
+        status_tab: "pending",
+        tier: "Tier 3 (> ₹1,00,000)",
+        justification: "High-scale APM telemetry and distributed tracing for production launch.",
+        budget: {
+          name: "Engineering Budget Impact",
+          used: 380000,
+          remaining: 120000,
+          total: 500000,
+          percent: 76
+        },
+        stepper: [
+          { role: "Manager", name: "Arun Verma", date: "Feb 15", state: "done" },
+          { role: "Finance", name: "Neha Gupta", date: "Feb 15", state: "done" },
+          { role: "Dept Head", name: "Rajesh Patel", date: "Final Sign-off", state: "active" }
+        ],
+        aiRisk: "LOW RISK",
+        aiSummary: [
+          "High-value Datadog APM contract (₹1,45,000) exceeds ₹1,00,000 threshold (Tier 3).",
+          "Sequential approval pathway: Manager (Done) -> Finance (Done) -> Dept Head (Pending).",
+          "Engineering budget capacity confirmed; valid GSTIN and 2 quotes attached."
+        ],
+        documents: [
+          { name: "Datadog_Contract_OrderForm.pdf", match: "99.1% Verified" }
+        ],
+        audit: [
+          "Feb 15 11:20 - Manager Arun Verma approved",
+          "Feb 15 15:45 - Finance Neha Gupta approved"
+        ]
+      },
+      {
+        id: "PR-1045",
+        title: "Ergonomic Studio Chairs (x5)",
+        category: "Design",
+        vendor: "Featherlite Workspaces",
+        requester_name: "Kunal Mehra",
+        requester_id: "u3",
+        avatar: "KM",
+        date: "Feb 14, 2025",
+        priority: "Low Priority",
+        amount: 42500,
+        waiting_days: 4,
+        status: "FLAGGED",
+        status_tab: "rejected",
+        tier: "Tier 2 (₹25k - ₹1L)",
+        justification: "Ergonomic seating for new UX team members.",
+        budget: {
+          name: "Facilities Budget Impact",
+          used: 65000,
+          remaining: 35000,
+          total: 100000,
+          percent: 65
+        },
+        stepper: [
+          { role: "Manager", name: "Sunil Joshi", date: "Blocked", state: "blocked" },
+          { role: "Finance", name: "Neha Gupta", date: "Waiting", state: "waiting" }
+        ],
+        aiRisk: "MEDIUM RISK",
+        aiSummary: [
+          "POLICY VIOLATION: Submissions exceeding ₹25,000 mandate at least two comparative vendor quotes.",
+          "Only 1 quote attached (Featherlite). System automatically blocks final approval."
+        ],
+        documents: [
+          { name: "Featherlite_Quote.pdf", match: "96.5% OCR Verified" },
+          { name: "MISSING_SECOND_QUOTE.alert", match: "Missing Document Flagger Active" }
+        ],
+        audit: [
+          "Feb 14 09:30 - Created by Kunal Mehra",
+          "Feb 14 09:32 - AI Policy Engine flagged missing second quote"
+        ]
+      },
+      {
+        id: "PR-1046",
+        title: "MacBook Pro M3 Max (32GB) - Priority",
+        category: "Engineering",
+        vendor: "Imagine Apple Reseller",
+        requester_name: "Aman Sen",
+        requester_id: "u3",
+        avatar: "AS",
+        date: "Feb 17, 2025",
+        priority: "High Priority",
+        amount: 245000,
+        waiting_days: 1,
+        status: "REJECTED",
+        status_tab: "rejected",
+        tier: "Tier 3 (> ₹1,00,000)",
+        justification: "Replacement laptop for senior build engineer.",
+        budget: {
+          name: "IT Hardware Budget Impact",
+          used: 410000,
+          remaining: 90000,
+          total: 500000,
+          percent: 82
+        },
+        stepper: [
+          { role: "Manager", name: "Arun Verma", date: "Rejected", state: "rejected" }
+        ],
+        aiRisk: "CRITICAL RISK",
+        aiSummary: [
+          "CRITICAL FRAUD / DUPLICATE ALERT: Invoice # INV-9921 exactly matches historical PR-1041 processed 28 days ago.",
+          "Automated approval lock engaged. AI strictly forbids automated sign-off; manual audit required."
+        ],
+        documents: [
+          { name: "Imagine_Invoice_INV9921_Duplicate.pdf", match: "Hash Match PR-1041" }
+        ],
+        audit: [
+          "Feb 17 08:15 - Created by Aman Sen",
+          "Feb 17 08:16 - AI duplicate detection hash matched PR-1041",
+          "Feb 17 09:00 - Rejected by Manager due to duplicate invoice policy"
+        ]
+      }
+    ];
+
+    let activeFilter = 'pending';
+    let currentPersona = 'manager';
+    let currentSearchTerm = '';
+    let isAllSelected = false;
+
+    // Initialize application
+    function init() {
+      renderCards();
+      updateMetrics();
+      setupKeyboardShortcuts();
+      showToast("BuyOps Neumorphic Platform loaded successfully.", "info");
+    }
+
+    function setupKeyboardShortcuts() {
+      window.addEventListener("keydown", (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          const searchInput = document.getElementById("searchInput");
+          searchInput.focus();
+          searchInput.select();
+        }
+      });
+    }
+
+    // Custom Neumorphic Toast System (No ugly browser alert popups!)
+    function showToast(message, type = 'info') {
+      const container = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+      
+      let icon = '<i class="fa-solid fa-circle-info text-blue-500"></i>';
+      let borderGlow = "border-blue-400/40";
+      if (type === 'success') {
+        icon = '<i class="fa-solid fa-circle-check text-emerald-500"></i>';
+        borderGlow = "border-emerald-400/40";
+      } else if (type === 'warning') {
+        icon = '<i class="fa-solid fa-triangle-exclamation text-amber-500"></i>';
+        borderGlow = "border-amber-400/40";
+      } else if (type === 'danger') {
+        icon = '<i class="fa-solid fa-circle-xmark text-rose-500"></i>';
+        borderGlow = "border-rose-400/40";
+      }
+
+      toast.className = `p-4 rounded-2xl neu-flat pointer-events-auto flex items-start gap-3 border ${borderGlow} text-xs font-bold text-slate-800 shadow-xl max-w-sm animate-in slide-in-from-top-3 duration-200`;
+      toast.innerHTML = `
+        <div class="text-base shrink-0 mt-0.5">${icon}</div>
+        <div class="flex-1 leading-snug">${message}</div>
+      `;
+
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-10px)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function changePersona(role) {
+      currentPersona = role;
+      const avatar = document.getElementById("userAvatar");
+      const roleSub = document.getElementById("userRoleSub");
+
+      if (role === 'manager') {
+        avatar.innerText = "MA";
+        roleSub.innerText = "admin • Engineering Lead";
+        showToast("Switched persona to Mike Anderson (Manager). All departmental requests visible.", "info");
+      } else if (role === 'requester') {
+        avatar.innerText = "SC";
+        roleSub.innerText = "employee • IT Specialist";
+        showToast("Switched persona to Sarah Chen (Requester). Row-Level Security active: only your own requests are visible.", "warning");
+      } else if (role === 'finance') {
+        avatar.innerText = "NG";
+        roleSub.innerText = "finance • Head of Finance";
+        showToast("Switched persona to Neha Gupta (Finance Manager). Budget authorization active.", "info");
+      } else if (role === 'depthead') {
+        avatar.innerText = "RP";
+        roleSub.innerText = "executive • VP of Engineering";
+        showToast("Switched persona to Rajesh Patel (Dept Head). Tier 3 (> ₹1L) authorization unlocked.", "info");
+      }
+      renderCards();
+    }
+
+    function setTabFilter(tab) {
+      activeFilter = tab;
+      
+      const tabs = ['pending', 'approved', 'rejected', 'all'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        if (t === tab) {
+          btn.className = "px-4 py-2 rounded-xl neu-pressed text-blue-600 font-extrabold flex items-center gap-1.5";
+        } else {
+          btn.className = "px-4 py-2 rounded-xl neu-btn text-slate-600 hover:text-slate-900 flex items-center gap-1.5";
+        }
+      });
+
+      renderCards();
+    }
+
+    function handleSearch(term) {
+      currentSearchTerm = term.toLowerCase();
+      renderCards();
+    }
+
+    function handleFilter(term) {
+      currentSearchTerm = term.toLowerCase();
+      renderCards();
+    }
+
+    function handleSort(sortMode) {
+      if (sortMode === 'amount_desc') {
+        requestsData.sort((a, b) => b.amount - a.amount);
+      } else if (sortMode === 'amount_asc') {
+        requestsData.sort((a, b) => a.amount - b.amount);
+      } else {
+        requestsData.sort((a, b) => b.waiting_days - a.waiting_days);
+      }
+      renderCards();
+      showToast(`Sorted feed by: ${sortMode}`, 'info');
+    }
+
+    function sortByOldestFirst() {
+      requestsData.sort((a, b) => b.waiting_days - a.waiting_days);
+      renderCards();
+      showToast("Sorted requests by longest wait time first.", "info");
+    }
+
+    function toggleSelectAll() {
+      isAllSelected = !isAllSelected;
+      const icon = document.getElementById("iconSelectAll");
+      if (isAllSelected) {
+        icon.className = "fa-solid fa-square-check text-blue-600";
+        showToast("Selected all 5 active requests.", "info");
+      } else {
+        icon.className = "fa-regular fa-square text-slate-400";
+        showToast("Deselected all requests.", "info");
+      }
+    }
+
+    function switchSidebarView(viewName) {
+      if (viewName === 'requests') {
+        setTabFilter('all');
+        showToast("Showing all purchase requests.", "info");
+      } else if (viewName === 'approvals') {
+        setTabFilter('pending');
+        showToast("Showing requests awaiting approval action.", "info");
+      } else if (viewName === 'overview') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        showToast("Workspace Overview active.", "info");
+      }
+    }
+
+    function renderCards() {
+      const feed = document.getElementById("requestsFeed");
+      feed.innerHTML = "";
+
+      // Object-Level Access: If viewing as requester, only show requests submitted by Sarah Chen
+      let dataset = requestsData;
+      if (currentPersona === 'requester') {
+        dataset = dataset.filter(r => r.requester_name === "Sarah Chen");
+      }
+
+      // Filter by tab
+      if (activeFilter !== 'all') {
+        dataset = dataset.filter(r => r.status_tab === activeFilter);
+      }
+
+      // Filter by search
+      if (currentSearchTerm) {
+        dataset = dataset.filter(r => 
+          r.title.toLowerCase().includes(currentSearchTerm) || 
+          r.id.toLowerCase().includes(currentSearchTerm) ||
+          r.vendor.toLowerCase().includes(currentSearchTerm) ||
+          r.requester_name.toLowerCase().includes(currentSearchTerm)
+        );
+      }
+
+      if (dataset.length === 0) {
+        feed.innerHTML = `
+          <div class="p-12 rounded-3xl neu-flat text-center text-slate-400 space-y-2">
+            <i class="fa-regular fa-folder-open text-4xl mb-1 text-slate-300"></i>
+            <p class="text-xs font-bold text-slate-500">No purchase requests found matching this filter.</p>
+            <p class="text-[11px] text-slate-400">Try switching your persona or changing the filter tab.</p>
+          </div>
+        `;
+        return;
+      }
+
+      dataset.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "p-6 rounded-3xl neu-flat space-y-5 hover:translate-y-[-2px] transition-transform";
+
+        // Top Row: Monogram, Title, Tag, Amount
+        let priorityPill = item.priority.includes("High") 
+          ? `<span class="text-rose-600 font-extrabold text-[11px] flex items-center gap-1.5 px-2.5 py-0.5 rounded-full neu-pressed"><i class="fa-solid fa-bolt-lightning text-rose-500"></i> ${item.priority}</span>`
+          : `<span class="text-amber-600 font-extrabold text-[11px] flex items-center gap-1.5 px-2.5 py-0.5 rounded-full neu-pressed"><i class="fa-regular fa-clock text-amber-500"></i> ${item.priority}</span>`;
+
+        let stepperHtml = item.stepper.map((st, idx) => {
+          let circleColor = "neu-btn text-slate-500";
+          let icon = idx + 1;
+          if (st.state === 'done') {
+            circleColor = "neu-btn-success text-white font-black";
+            icon = `<i class="fa-solid fa-check text-[10px]"></i>`;
+          } else if (st.state === 'active') {
+            circleColor = "neu-convex text-amber-600 font-black border border-amber-300/40 ring-2 ring-amber-300/30";
+            icon = idx + 1;
+          } else if (st.state === 'blocked' || st.state === 'rejected') {
+            circleColor = "neu-btn-danger text-rose-600 font-black";
+            icon = `<i class="fa-solid fa-xmark text-[10px]"></i>`;
+          } else if (st.state === 'bypassed') {
+            circleColor = "neu-pressed text-slate-400";
+            icon = `-`;
+          }
+
+          return `
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-xl ${circleColor} flex items-center justify-center font-black text-xs shrink-0">
+                ${icon}
+              </div>
+              <div class="text-[11px]">
+                <p class="font-bold text-slate-800 leading-tight">${st.role}</p>
+                <p class="text-slate-400 text-[10px] font-medium">${st.name} · ${st.date}</p>
+              </div>
+            </div>
+            ${idx < item.stepper.length - 1 ? `<div class="h-0.5 w-8 neu-pressed"></div>` : ''}
+          `;
+        }).join("");
+
+        // Budget Impact Sub-Card
+        let budgetHtml = item.budget ? `
+          <div class="p-3.5 rounded-2xl neu-pressed flex items-center justify-between text-xs">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl neu-convex text-blue-700 flex items-center justify-center font-black text-xs">
+                ${item.budget.percent}%
+              </div>
+              <div>
+                <span class="font-extrabold text-slate-800">${item.budget.name}</span>
+                <p class="text-[10px] text-slate-500 font-medium">Utilized after approval</p>
+              </div>
+            </div>
+            <div class="text-[11px] text-slate-600 font-semibold">
+              Used: <strong class="text-slate-800">₹${item.budget.used.toLocaleString('en-IN')}</strong> · 
+              Remaining: <strong class="text-emerald-600 font-black">₹${item.budget.remaining.toLocaleString('en-IN')}</strong> · 
+              Total: <strong>₹${item.budget.total.toLocaleString('en-IN')}</strong>
+            </div>
+          </div>
+        ` : '';
+
+        // Action Buttons Row
+        let actionsHtml = "";
+        if (currentPersona !== 'requester' && item.status_tab === 'pending') {
+          actionsHtml = `
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-300/40">
+              <div class="flex items-center gap-2.5">
+                <button onclick="approveRequest('${item.id}')" class="px-4 py-2 neu-btn-success rounded-xl text-xs font-bold flex items-center gap-1.5">
+                  <i class="fa-solid fa-check text-xs"></i>
+                  <span>Approve</span>
+                </button>
+                <button onclick="rejectRequest('${item.id}')" class="px-4 py-2 neu-btn-danger rounded-xl text-xs font-bold flex items-center gap-1.5">
+                  <i class="fa-solid fa-xmark text-xs"></i>
+                  <span>Reject</span>
+                </button>
+                <button onclick="requestChanges('${item.id}')" class="px-3.5 py-2 neu-btn rounded-xl text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                  <i class="fa-regular fa-square"></i>
+                  <span>Request Changes</span>
+                </button>
+              </div>
+              
+              <button onclick="openDetailModal('${item.id}')" class="text-xs font-extrabold text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                <span>View AI Risk Analysis</span>
+                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+              </button>
+            </div>
+          `;
+        } else {
+          actionsHtml = `
+            <div class="flex items-center justify-between pt-3 border-t border-slate-300/40">
+              <span class="text-[11px] font-bold text-slate-500">Status: <strong class="text-slate-800">${item.status}</strong> (${item.tier})</span>
+              <button onclick="openDetailModal('${item.id}')" class="px-3 py-1.5 neu-btn rounded-xl text-xs font-bold text-blue-600 hover:underline">
+                View Dossier & Audit Log
+              </button>
+            </div>
+          `;
+        }
+
+        card.innerHTML = `
+          <!-- Header Row -->
+          <div class="flex items-start justify-between">
+            <div class="flex items-start gap-3.5">
+              <div class="w-11 h-11 rounded-2xl neu-convex text-slate-700 font-black text-xs flex items-center justify-center shrink-0">
+                ${item.avatar}
+              </div>
+              <div>
+                <div class="flex items-center gap-2.5">
+                  <h3 class="font-extrabold text-base text-slate-800">${item.title}</h3>
+                  ${priorityPill}
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5 font-medium">
+                  ${item.requester_name} · ${item.category} · ${item.date}
+                </p>
+                <p class="text-xs text-slate-600 mt-1 max-w-xl font-medium leading-relaxed">
+                  ${item.justification}
+                </p>
+              </div>
+            </div>
+
+            <!-- Amount & PR ID -->
+            <div class="text-right">
+              <div class="text-xl font-black text-slate-900 tracking-tight">₹${item.amount.toLocaleString('en-IN')}</div>
+              <p class="text-[11px] text-blue-600 font-mono font-bold mt-0.5">${item.id}</p>
+              <p class="text-[10px] text-slate-500 font-bold mt-0.5">Waiting: ${item.waiting_days} days</p>
+            </div>
+          </div>
+
+          <!-- Stepper Row -->
+          <div class="p-3.5 rounded-2xl neu-pressed flex items-center gap-3 overflow-x-auto">
+            ${stepperHtml}
+          </div>
+
+          <!-- Budget Impact Subcard -->
+          ${budgetHtml}
+
+          <!-- Actions -->
+          ${actionsHtml}
+        `;
+
+        feed.appendChild(card);
+      });
+    }
+
+    function updateMetrics() {
+      const pending = requestsData.filter(r => r.status_tab === 'pending').length;
+      const approved = requestsData.filter(r => r.status_tab === 'approved').length;
+      const rejected = requestsData.filter(r => r.status_tab === 'rejected').length;
+      const total = requestsData.length;
+
+      document.getElementById("countPending").innerText = pending;
+      document.getElementById("countApproved").innerText = approved;
+      document.getElementById("countRejected").innerText = rejected;
+      document.getElementById("countAll").innerText = total;
+
+      document.getElementById("donutPending").innerText = pending;
+      document.getElementById("donutApproved").innerText = approved;
+      document.getElementById("donutRejected").innerText = rejected;
+
+      document.getElementById("sidebarApprovalCount").innerText = pending;
+
+      const sumPending = requestsData
+        .filter(r => r.status_tab === 'pending')
+        .reduce((acc, curr) => acc + curr.amount, 0);
+
+      document.getElementById("pendingValueDisplay").innerText = `₹${sumPending.toLocaleString('en-IN')}`;
+    }
+
+    function approveRequest(id) {
+      const item = requestsData.find(r => r.id === id);
+      if (!item) return;
+
+      // Policy check: Missing documents block approval!
+      if (item.status === 'FLAGGED') {
+        showToast(`⚠️ POLICY GUARDRAIL BLOCKED: ${id} is flagged for missing supporting documents. Approval is blocked until documents are supplied.`, "warning");
+        return;
+      }
+
+      // Tier 3 Escalation
+      if (item.amount > 100000 && currentPersona !== 'depthead' && currentPersona !== 'finance') {
+        showToast(`⚠️ TIER 3 ESCALATION RULE: Purchases > ₹1,00,000 require Department Head (VP) authorization. Your Line Manager sign-off advances this to Finance & Dept Head.`, "info");
+      }
+
+      item.status_tab = 'approved';
+      item.status = 'APPROVED';
+      item.stepper.forEach(s => {
+        if (s.name.includes("You") || s.role.includes("Manager") || s.role.includes("Finance") || s.role.includes("Dept Head")) {
+          s.state = 'done';
+          s.date = 'Just now';
+        }
+      });
+      item.audit.push(`Feb 18 Just now - Approved by ${currentPersona.toUpperCase()}`);
+
+      showToast(`✓ Request ${id} (${item.title}) has been formally APPROVED by ${currentPersona.toUpperCase()}.`, "success");
+      renderCards();
+      updateMetrics();
+    }
+
+    function rejectRequest(id) {
+      const item = requestsData.find(r => r.id === id);
+      if (!item) return;
+      item.status_tab = 'rejected';
+      item.status = 'REJECTED';
+      item.audit.push(`Feb 18 Just now - Rejected by ${currentPersona.toUpperCase()}`);
+      showToast(`✕ Request ${id} has been marked as REJECTED. Requester notified.`, "danger");
+      renderCards();
+      updateMetrics();
+    }
+
+    function requestChanges(id) {
+      const item = requestsData.find(r => r.id === id);
+      if (!item) return;
+      item.status = 'FLAGGED';
+      item.status_tab = 'rejected';
+      item.audit.push(`Feb 18 Just now - Changes/quotes requested by ${currentPersona.toUpperCase()}`);
+      showToast(`💬 Clarification / second quote request dispatched to ${item.requester_name}.`, "warning");
+      renderCards();
+      updateMetrics();
+    }
+
+    function openDetailModal(id) {
+      const item = requestsData.find(r => r.id === id);
+      if (!item) return;
+
+      document.getElementById("detailId").innerText = item.id;
+      document.getElementById("detailTitle").innerText = item.title;
+      document.getElementById("detailAmount").innerText = `₹${item.amount.toLocaleString('en-IN')}`;
+      document.getElementById("detailTier").innerText = item.tier;
+      document.getElementById("detailRequester").innerText = `${item.requester_name} (${item.category})`;
+      document.getElementById("detailVendor").innerText = item.vendor;
+
+      const riskBadge = document.getElementById("detailRiskBadge");
+      riskBadge.innerText = item.aiRisk;
+      if (item.aiRisk.includes("LOW")) {
+        riskBadge.className = "text-[10px] font-black px-2.5 py-0.5 rounded-full neu-pressed text-emerald-700";
+      } else if (item.aiRisk.includes("MEDIUM")) {
+        riskBadge.className = "text-[10px] font-black px-2.5 py-0.5 rounded-full neu-pressed text-amber-700";
+      } else {
+        riskBadge.className = "text-[10px] font-black px-2.5 py-0.5 rounded-full neu-pressed text-rose-700";
+      }
+
+      document.getElementById("detailAiBullets").innerHTML = item.aiSummary.map(b => `<li>${b}</li>`).join("");
+      document.getElementById("detailDocsList").innerHTML = item.documents.map(d => `
+        <div class="p-3 rounded-xl neu-pressed flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <i class="fa-solid fa-file-pdf text-rose-500 text-sm"></i>
+            <span class="font-bold text-slate-800">${d.name}</span>
+          </div>
+          <span class="text-[10px] neu-btn text-slate-800 px-2 py-0.5 rounded-md font-mono font-bold">${d.match}</span>
+        </div>
+      `).join("");
+
+      document.getElementById("detailAuditTrail").innerHTML = item.audit.map(a => `<div>${a}</div>`).join("");
+      document.getElementById("modalUserRoleDisplay").innerText = `${currentPersona.toUpperCase()} User`;
+
+      const actionsGroup = document.getElementById("modalActionsGroup");
+      if (currentPersona !== 'requester') {
+        actionsGroup.innerHTML = `
+          <button onclick="rejectRequest('${item.id}'); closeDetailModal();" class="px-4 py-2 neu-btn-danger rounded-xl font-bold">Reject</button>
+          <button onclick="approveRequest('${item.id}'); closeDetailModal();" class="px-5 py-2 neu-btn-success rounded-xl font-bold">Approve Request</button>
+        `;
+      } else {
+        actionsGroup.innerHTML = `
+          <button onclick="closeDetailModal()" class="px-5 py-2 neu-btn-primary rounded-xl font-bold">Close</button>
+        `;
+      }
+
+      document.getElementById("detailModal").classList.remove("hidden");
+    }
+
+    function closeDetailModal() {
+      document.getElementById("detailModal").classList.add("hidden");
+    }
+
+    function openNewRequestModal() {
+      document.getElementById("newRequestModal").classList.remove("hidden");
+    }
+
+    function closeNewRequestModal() {
+      document.getElementById("newRequestModal").classList.add("hidden");
+    }
+
+    function openBudgetModal() {
+      document.getElementById("budgetModal").classList.remove("hidden");
+    }
+
+    function closeBudgetModal() {
+      document.getElementById("budgetModal").classList.add("hidden");
+    }
+
+    function openUatModal() {
+      document.getElementById("uatModal").classList.remove("hidden");
+    }
+
+    function closeUatModal() {
+      document.getElementById("uatModal").classList.add("hidden");
+    }
+
+    function autoFillSampleData() {
+      document.getElementById("newTitle").value = "JetBrains IDE Team Pack (x5 Seats)";
+      document.getElementById("newCategory").value = "Cloud SaaS";
+      document.getElementById("newAmount").value = "38500";
+      document.getElementById("newVendor").value = "JetBrains s.r.o.";
+      document.getElementById("newJustification").value = "Required for backend Kotlin and frontend React engineering velocity.";
+      document.getElementById("twoQuotesCheck").checked = true;
+      showTierHint(38500);
+      showToast("AI OCR extracted invoice fields and verified GSTIN format.", "success");
+    }
+
+    function showTierHint(val) {
+      const hint = document.getElementById("tierHint");
+      const amt = parseFloat(val);
+      if (!amt || isNaN(amt)) {
+        hint.innerText = "Tier 1: ≤ ₹25k | Tier 2: ₹25k-₹1L | Tier 3: > ₹1L";
+      } else if (amt <= 25000) {
+        hint.innerHTML = "<strong class='text-emerald-600'>Tier 1 (≤ ₹25,000):</strong> Requires Manager approval only.";
+      } else if (amt <= 100000) {
+        hint.innerHTML = "<strong class='text-blue-600'>Tier 2 (₹25,001 - ₹1,00,000):</strong> Requires Manager + Finance approval & 2 quotes.";
+      } else {
+        hint.innerHTML = "<strong class='text-amber-600'>Tier 3 (> ₹1,00,000):</strong> Requires Manager, Finance, and Dept Head approval.";
+      }
+    }
+
+    function handleCreateRequest(e) {
+      e.preventDefault();
+      const title = document.getElementById("newTitle").value;
+      const cat = document.getElementById("newCategory").value;
+      const amount = parseFloat(document.getElementById("newAmount").value);
+      const vendor = document.getElementById("newVendor").value;
+      const justification = document.getElementById("newJustification").value;
+      const hasQuotes = document.getElementById("twoQuotesCheck").checked;
+
+      let tier = "Tier 1 (≤ ₹25,000)";
+      if (amount > 100000) tier = "Tier 3 (> ₹1,00,000)";
+      else if (amount > 25000) tier = "Tier 2 (₹25k - ₹1L)";
+
+      let isFlagged = false;
+      if (amount > 25000 && !hasQuotes) {
+        isFlagged = true;
+      }
+
+      const newId = `PR-${1042 + requestsData.length}`;
+      const newReq = {
+        id: newId,
+        title: title,
+        category: cat,
+        vendor: vendor,
+        requester_name: "Sarah Chen",
+        requester_id: "u1",
+        avatar: "SC",
+        date: "Today",
+        priority: "Medium",
+        amount: amount,
+        waiting_days: 0,
+        status: isFlagged ? "FLAGGED" : "PENDING_MANAGER",
+        status_tab: isFlagged ? "rejected" : "pending",
+        tier: tier,
+        justification: justification,
+        budget: {
+          name: "Department Budget Impact",
+          used: 120000,
+          remaining: 80000,
+          total: 200000,
+          percent: 60
+        },
+        stepper: [
+          { role: "Manager", name: "You", date: "Pending", state: "active" },
+          { role: "Finance", name: "Finance", date: "Awaiting", state: "waiting" }
+        ],
+        aiRisk: isFlagged ? "MEDIUM RISK" : "LOW RISK",
+        aiSummary: [
+          `New request created for ${cat} from ${vendor}.`,
+          `Categorized under ${tier} based on automated threshold rule.`,
+          isFlagged ? "Flagged: Missing 2nd comparative quote." : "All document validations passed."
+        ],
+        documents: [
+          { name: `${vendor.replace(/\s+/g, '_')}_Invoice.pdf`, match: "99.0% OCR Verified" }
+        ],
+        audit: [
+          `Feb 18 Just now - Request created by Sarah Chen`
+        ]
+      };
+
+      requestsData.unshift(newReq);
+      showToast(`🎉 Purchase Request ${newId} submitted successfully! First-Time-Right validated.`, "success");
+      closeNewRequestModal();
+      renderCards();
+      updateMetrics();
+    }
+
+    function toggleCopilotModal() {
+      document.getElementById("copilotModal").classList.toggle("hidden");
+    }
+
+    function askCopilot(text) {
+      document.getElementById("copilotInputText").value = text;
+      sendCopilotMsg();
+    }
+
+    function sendCopilotMsg() {
+      const input = document.getElementById("copilotInputText");
+      const text = input.value.trim();
+      if (!text) return;
+
+      const area = document.getElementById("copilotChatArea");
+      const userBubble = document.createElement("div");
+      userBubble.className = "p-3 rounded-2xl neu-btn-primary ml-8 text-right font-bold text-xs";
+      userBubble.innerText = text;
+      area.appendChild(userBubble);
+      input.value = "";
+      area.scrollTop = area.scrollHeight;
+
+      setTimeout(() => {
+        let reply = "";
+        const lower = text.toLowerCase();
+        if (lower.includes("pr-1042")) {
+          reply = "<strong>PR-1042 (Cloud Server Licenses - ₹12,500):</strong><br>• Status: <em>Pending Manager Approval</em><br>• Prior: Approved by Team Lead Mark Wilson.<br>• Tier 1: Needs only Manager sign-off. Finance bypassed.";
+        } else if (lower.includes("tier 3") || lower.includes("1,00,000")) {
+          reply = "<strong>Tier 3 Approval Policy (> ₹1,00,000):</strong><br>• Requires 3 sequential human sign-offs: Line Manager → Finance → Department Head.<br>• Must have 2 vendor quotes and valid GST credentials.";
+        } else if (lower.includes("ai approve")) {
+          reply = "<strong>S3K Principle: AI Assisted – Human Governed.</strong><br>AI <strong>never</strong> independently approves financial requests. Approvals are strictly human-governed.";
+        } else {
+          reply = `Procurement Policy: All purchase requests are routed dynamically (Tier 1: ≤ ₹25k, Tier 2: ₹25k-₹1L, Tier 3: > ₹1L). Missing documents block final approval.`;
+        }
+
+        const aiBubble = document.createElement("div");
+        aiBubble.className = "p-3.5 rounded-2xl neu-flat text-slate-800 text-xs space-y-1";
+        aiBubble.innerHTML = reply;
+        area.appendChild(aiBubble);
+        area.scrollTop = area.scrollHeight;
+      }, 300);
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
