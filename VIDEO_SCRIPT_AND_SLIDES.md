@@ -23,7 +23,7 @@
 * **Slide 2: AS-IS Bottlenecks vs. TO-BE KPIs:** Comparison table showing 5-day cycle time reduced to 18.4 hours, 28% incomplete submissions cut to 3.2%, and 90% status pings deflected.
 * **Slide 3: Workflow Architecture & Policy Tiers:** The 3 tiers (≤ ₹25k, ₹25k-₹100k, > ₹100k) with the principle: *AI Assisted – Human Governed*.
 * **Slide 4: Live Demo (Screen Share):** Walkthrough of `frontend/index.html` (BuyOps layout, Card 1 review, Budget impact donut, AI Copilot, Requester RLS view).
-* **Slide 5: Technical Stack & Security Verification:** Diagram showing React/Tailwind, FastAPI, SQLite/PostgreSQL, RLS/IDOR defense, and 100% UAT test results.
+* **Slide 5: Technical Stack & Security Verification:** Architecture diagram showing Vanilla JS + Tailwind CSS (Neumorphic Soft UI), Python FastAPI, SQLite/PostgreSQL, PBKDF2 + Signed JWT Auth, Sequential State Machine, Verifiable Hash-Chained Audit Ledger, and 100% UAT test results (7 automated tests).
 * **Slide 6: AI Teaching Concept & Human Ownership:** Teaching slide (*What is Context Grounding / RAG?*) + Breakdown of Human Engineering vs. AI Tools.
 
 ---
@@ -72,11 +72,11 @@
 >
 > Clicking *'View AI Risk Analysis'* opens our dossier: AI OCR extracted the AWS invoice with 99.4% confidence, confirmed zero duplicate matches, and verified budget headroom.
 >
-> When the manager clicks **'Approve'**, the request instantly updates to Approved, and a tamper-evident audit record is hashed and committed.
+> When the manager clicks **'Approve'**, notice what happens behind the scenes: The frontend makes an asynchronous API `fetch()` call carrying a signed JWT Bearer token to `POST /api/v1/requests/PR-1042/decision`. The FastAPI backend verifies manager credentials, executes the sequential state transition, updates the database, appends a cryptographically linked block to our audit hash chain, and returns an instant response displayed in our custom soft-UI toast.
 >
-> Now, observe what happens when we switch persona in the bottom-left to **Sarah Chen (Requester)**. Thanks to Row-Level Security, Sarah can *only* see her own requests. She cannot see other employees' sensitive software or equipment requests, completely eliminating IDOR privacy vulnerabilities.
+> Now, observe what happens when we switch persona in the bottom-left to **Sarah Chen (Requester)**. Switching personas triggers a real `POST /api/v1/auth/login` to obtain Sarah's personal JWT token. Thanks to Object-Level Security at the data layer, Sarah's dashboard re-fetches and shows *only* her own requests. She cannot see other employees' sensitive software or equipment requests, completely eliminating IDOR privacy vulnerabilities.
 >
-> Lastly, employees can open the **AI Policy & Status Copilot** in the bottom corner. Typing *'What is the status of PR-1042?'* gives an immediate real-time response, completely eliminating the need to email Finance."
+> Lastly, employees can open the **AI Policy & Status Copilot** in the bottom corner. Typing *'What are the rules for Tier 3 purchases above 100000?'* runs our semantic policy RAG engine, matching against indexed procurement clauses with 100% confidence, giving immediate policy guidance without burdening Finance."
 
 ---
 
@@ -85,15 +85,18 @@
 **Speaking Notes:**
 > "Now let's think like an engineer.
 >
-> Our architecture combines a responsive React/Tailwind frontend with a high-performance **Python FastAPI** backend and SQLite/PostgreSQL database.
+> Our architecture combines a responsive, zero-build Vanilla JavaScript and Tailwind CSS frontend styled with tactile Neumorphic Soft UI, communicating via authenticated JSON APIs with a high-performance **Python FastAPI** backend and SQLite/PostgreSQL database.
 >
-> To ensure production readiness, I implemented and executed an automated test suite in `backend/test_api.py` covering four critical UAT scenarios:
-> 1. **Unauthorized Access Defense (IDOR):** Verified that a user querying another employee's request ID receives a strict HTTP 403 Forbidden.
-> 2. **Missing Document Gatekeeper:** Tested request PR-1045 with missing competitive quotes. The API returns HTTP 422, locking approval until the second quote is uploaded.
-> 3. **Tier 3 Governance:** Verified that purchases over ₹1,00,000 cannot generate a PO until the Department Head signs off.
-> 4. **Duplicate Anomaly Detection:** Verified that invoices with duplicate hashes are automatically flagged for fraud review.
+> To ensure enterprise-grade security and reliability, I authored and verified an automated test suite in `backend/test_api.py` covering seven critical integration and security scenarios:
+> 1. **Authentication & Tamper Defense:** Real PBKDF2-HMAC-SHA256 password hashing and cryptographically signed JWT Bearer tokens; tampered or missing tokens are strictly rejected with HTTP 401.
+> 2. **Object-Level Authorization (IDOR Defense):** Verified that a user querying another employee's request ID receives an immediate HTTP 403 Forbidden.
+> 3. **Strict Sequential Approval State Machine:** Verified that Department Heads cannot prematurely approve Tier 3 requests while Finance approval is pending; the system blocks premature sign-offs with HTTP 403.
+> 4. **Missing Document Gatekeeper:** Tested request PR-1045 with missing competitive quotes; the API returns HTTP 422, locking approval until compliance documents are attached.
+> 5. **Cryptographic Duplicate Invoice Collision Detection:** Proved that submitting an invoice with an identical SHA-256 hash automatically flags the request as CRITICAL RISK.
+> 6. **Verifiable Hash-Chained Audit Ledger:** Validated blockchain-style cryptographic linkage (`prev_hash` to `log_hash`) across all ledger blocks via `/api/v1/audit/verify-chain`.
+> 7. **Context-Grounded Semantic AI Copilot:** Verified that AI answers are mathematically grounded in company procurement policy clauses.
 >
-> All automated tests pass with a 100% success rate."
+> All 7 automated tests pass with 100% verification."
 
 ---
 
@@ -120,10 +123,12 @@
 > **Where I used AI:** I leveraged AI assistants for CSS layout scaffolding and synthesizing mock invoice data.
 >
 > **My personal engineering ownership:**
-> • I designed the 3-tier policy matrix and approval state machine.
-> • I architected the Object-Level Security (RLS) model to prevent IDOR leaks.
-> • I designed the SHA-256 tamper-evident audit logging engine.
-> • And I authored and verified the automated UAT test suite in FastAPI.
+> • I designed and implemented the real PBKDF2 password hashing and signed JWT Bearer authentication system.
+> • I engineered the strict sequential approval state machine to eliminate authorization gaps and stage skipping.
+> • I architected the Object-Level Security (RLS) model at the data-access layer to prevent IDOR leaks.
+> • I designed the cryptographic SHA-256 hash-chained audit ledger with on-demand mathematical verification.
+> • I implemented the context-grounded semantic policy RAG retrieval engine and live Gemini API hook.
+> • And I authored and verified the 7-scenario automated test suite in FastAPI.
 >
 > FlowSync demonstrates that when AI is paired with strict human governance, enterprise workflows become faster, transparent, and completely audit-proof.
 >

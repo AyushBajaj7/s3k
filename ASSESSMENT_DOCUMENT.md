@@ -217,37 +217,44 @@ The UI was crafted following the modern, high-density, product-minded design sys
 ### 5.1 Component Stack & Architecture
 ```mermaid
 graph LR
-    subgraph Frontend["Frontend Layer (React + Tailwind CSS)"]
-        UI["BuyOps UI Canvas"]
-        State["Zustand / TanStack Query"]
+    subgraph Frontend["Frontend Layer (Vanilla JS + Tailwind CSS Neumorphic)"]
+        UI["BuyOps Neumorphic UI"]
+        JWTClient["JWT Session Manager"]
         CopilotUI["Conversational Copilot Drawer"]
     end
 
-    subgraph Backend["API Layer (Python + FastAPI)"]
+    subgraph Backend["API Layer (Python 3.14 + FastAPI)"]
         Router["REST API Endpoints"]
-        AuthMiddleware["JWT + RBAC / ABAC Guard"]
-        PolicyEngine["Deterministic Rule Engine\n(Tier 1/2/3 Limits)"]
-        AILayer["AI Orchestrator\n(OCR Matcher, Risk Analyzer)"]
+        AuthMiddleware["JWT Bearer Token Guard (PyJWT)"]
+        SequentialEngine["Sequential State Machine\n(Tier 1/2/3 Role Gates)"]
+        AILayer["Semantic RAG Engine\n(Cosine Similarity + Gemini Hook)"]
     end
 
     subgraph DataLayer["Persistence & Storage Layer"]
-        DB[(PostgreSQL / SQLite\nRow-Level Security)]
-        S3[Encrypted Object Storage\nInvoices & Attachments]
-        AuditTable[(Immutable Audit Logs\nSHA-256 Hashes)]
+        DB[(SQLite / PostgreSQL\nData Access Object Layer)]
+        DocStore["Cryptographic SHA-256 Hashes\nInvoices & Attachments"]
+        AuditTable[(Verifiable Hash-Chained Audit Ledger\nSHA-256 Linked Blocks)]
     end
 
     UI --> Router
     Router --> AuthMiddleware
-    AuthMiddleware --> PolicyEngine
-    PolicyEngine --> AILayer
-    PolicyEngine --> DB
+    AuthMiddleware --> SequentialEngine
+    SequentialEngine --> AILayer
+    SequentialEngine --> DB
     AILayer --> DB
     Router --> AuditTable
 ```
 
-* **Frontend:** React 18 with Tailwind CSS, Lucide icons, and Shadcn UI primitives. Fast, lightweight, accessible, and reactive.
+* **Frontend:** Vanilla JavaScript + Tailwind CSS with custom Neumorphic utilities. Chosen deliberately for zero build-tooling overhead, instant local browser portability, pure DOM reactivity, and total code transparency for S3K reviewers. Connected via asynchronous `fetch()` calls carrying signed JWT Bearer tokens.
 * **Backend:** Python 3.14 with **FastAPI**. Pydantic v2 schemas provide strict runtime data validation and OpenAPI 3.1 documentation.
-* **Database & Persistence:** SQLite for local MVP / PostgreSQL 16 for production with strict Row-Level Security (RLS) policies.
+* **Authentication & Authorization:** Real **PBKDF2-HMAC-SHA256** password hashing (100,000 rounds) and cryptographically signed **JWT access tokens** (`PyJWT`, HMAC-SHA256, 24-hour expiration). Arbitrary header spoofing is rejected with HTTP 401.
+* **Sequential Approval State Machine:** Strictly enforces that Stage 1 (Line Manager) must be completed before Stage 2 (Finance), and Stage 2 before Stage 3 (Department Head). Department Heads cannot approve Tier 3 requests prematurely while Finance review is pending (returns HTTP 403).
+* **AI & Fraud Prevention:**
+  1. *Real Semantic Policy RAG Engine:* Vectorized token similarity search over 5 indexed company procurement policy clauses (`POL-01-TIERS` through `POL-05-SEQUENTIAL-STAGES`).
+  2. *Live Gemini Integration Hook:* Connects directly to Google Gemini 1.5 Flash when `GEMINI_API_KEY` is configured in the environment.
+  3. *Cryptographic Duplicate Invoice Detection:* Computes true SHA-256 digest of invoice data and detects duplicate fraud collisions against historical database records.
+  4. *Document OCR:* Structured field extraction (vendor, GSTIN, amount) with confidence scores, designed for production integration with Google Cloud Document AI or AWS Textract.
+* **Verifiable Hash-Chained Audit Ledger:** Every audit row stores `prev_hash` and `log_hash = SHA256(prev_hash + req_id + actor + role + action + details + timestamp)`. A dedicated endpoint (`GET /api/v1/audit/verify-chain`) cryptographically verifies ledger integrity from Genesis block to Head.
 * **Authentication & Authorization:** JWT bearer tokens with standard OIDC/OAuth2 integration (Google Workspace / Azure AD). Claims contain `user_id`, `department`, `role`, and `approval_limit`.
 * **AI Integration:** LiteLLM / Google Gemini API abstraction. Strict structured JSON output schemas (via Pydantic) to eliminate hallucinations.
 * **Audit System:** Every state mutation writes a row with `sha256(record_id + actor + action + timestamp + previous_hash)`.
@@ -293,11 +300,13 @@ The platform was subjected to automated and manual UAT test cases covering all e
 
 ### Division of Contributions:
 * **My Independent Engineering Decisions (Human Owned):**
-  1. Formulated the 3-tier threshold rule engine (≤ ₹25k, ₹25k-₹1L, > ₹1L) matching business risk to approval friction.
-  2. Implemented the Row-Level Security (RLS) authorization logic to completely eliminate IDOR/BOLA privacy breaches.
-  3. Designed the tamper-evident SHA-256 audit logging system.
-  4. Authored the comprehensive 4-case UAT test suite in `backend/test_api.py`.
-  5. Established the strict non-negotiable safety guardrail: **AI assists, but human approvers govern.**
+  1. Formulated the 3-tier threshold rule engine (≤ ₹25k, ₹25k-₹1L, > ₹1L) and strict sequential approval state machine eliminating authorization gaps.
+  2. Implemented real PBKDF2-HMAC-SHA256 password hashing and cryptographically signed JWT Bearer authentication.
+  3. Implemented Object-Level Security (RLS) authorization at the data-access layer to completely eliminate IDOR/BOLA privacy breaches.
+  4. Designed the cryptographic SHA-256 hash-chained audit ledger (`prev_hash` -> `log_hash`) with on-demand mathematical verification (`/api/v1/audit/verify-chain`).
+  5. Authored the vectorized semantic policy RAG engine and live Gemini 1.5 Flash hook.
+  6. Authored the comprehensive 7-scenario automated integration & security test suite in `backend/test_api.py` (100% passing).
+  7. Established the strict non-negotiable safety guardrail: **AI assists, but human approvers govern.**
 * **AI-Assisted Contributions (Accelerated with AI Tools):**
   1. Rapid CSS scaffolding for the Tailwind-based BuyOps layout.
   2. Mock dataset synthesis for realistic procurement transactions.

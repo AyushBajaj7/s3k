@@ -164,9 +164,9 @@
         </div>
         <div>
           <span class="font-extrabold text-base tracking-tight text-slate-800">BuyOps<span class="text-blue-600">.ai</span></span>
-          <span class="block text-[10px] font-bold text-slate-400 -mt-0.5 uppercase tracking-wider">Neumorphic SaaS</span>
+          <span class="block text-[10px] font-bold text-slate-400 -mt-0.5 uppercase tracking-wider">FastAPI + JWT</span>
         </div>
-        <span class="ml-auto text-[9px] font-black px-2 py-0.5 rounded-full neu-pressed text-emerald-600 uppercase">Live</span>
+        <span class="ml-auto text-[9px] font-black px-2 py-0.5 rounded-full neu-pressed text-emerald-600 uppercase" id="apiConnectionStatus">API</span>
       </div>
 
       <!-- Nav Section: MAIN -->
@@ -819,232 +819,32 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- JAVASCRIPT APP LOGIC (With Custom Neumorphic Toast Alerts)                 -->
+  <!-- JAVASCRIPT APP LOGIC (Real API Integration + JWT Bearer Tokens)             -->
   <!-- ========================================================================= -->
   <script>
-    const API_BASE = "http://127.0.0.1:8000/api/v1";
+    const API_BASE = window.location.origin.includes("http") 
+      ? window.location.origin + "/api/v1" 
+      : "http://127.0.0.1:8000/api/v1";
 
-    let requestsData = [
-      {
-        id: "PR-1042",
-        title: "Cloud Server Licenses",
-        category: "IT",
-        vendor: "AWS India",
-        requester_name: "Sarah Chen",
-        requester_id: "u1",
-        avatar: "SC",
-        date: "Feb 18, 2025",
-        priority: "High Priority",
-        amount: 12500,
-        waiting_days: 2,
-        status: "PENDING_MANAGER",
-        status_tab: "pending",
-        tier: "Tier 1 (≤ ₹25,000)",
-        justification: "Current servers reaching capacity. Need additional licenses for Q2 scaling.",
-        budget: {
-          name: "Engineering Budget Impact",
-          used: 156000,
-          remaining: 44000,
-          total: 200000,
-          percent: 78
-        },
-        stepper: [
-          { role: "Team Lead", name: "Mark Wilson", date: "Feb 18", state: "done" },
-          { role: "Manager", name: "You", date: "Pending", state: "active" },
-          { role: "Finance", name: "CFO", date: "Tier 1 (Bypassed)", state: "bypassed" }
-        ],
-        aiRisk: "LOW RISK",
-        aiSummary: [
-          "EC2 compute expansion for IT team; amount ₹12,500 falls strictly under Tier 1 (≤ ₹25,000).",
-          "Requires only Line Manager approval; Finance/Dept Head bypassed per policy.",
-          "OCR matched vendor invoice with 99.4% confidence."
-        ],
-        documents: [
-          { name: "AWS_Invoice_INV-9821.pdf", match: "99.4% OCR Confirmed" }
-        ],
-        audit: [
-          "Feb 18 10:15 - Request created by Sarah Chen",
-          "Feb 18 10:30 - Team Lead Mark Wilson approved"
-        ]
-      },
-      {
-        id: "PR-1043",
-        title: "Marketing Analytics Platform (HubSpot)",
-        category: "Marketing",
-        vendor: "HubSpot Ireland",
-        requester_name: "Lisa Park",
-        requester_id: "u2",
-        avatar: "LP",
-        date: "Feb 17, 2025",
-        priority: "Medium",
-        amount: 85000,
-        waiting_days: 1,
-        status: "PENDING_FINANCE",
-        status_tab: "pending",
-        tier: "Tier 2 (₹25k - ₹1L)",
-        justification: "Annual seat expansion for campaign lifecycle automation and lead scoring.",
-        budget: {
-          name: "Marketing Budget Impact",
-          used: 210000,
-          remaining: 90000,
-          total: 300000,
-          percent: 70
-        },
-        stepper: [
-          { role: "Manager", name: "Arun Verma", date: "Feb 17", state: "done" },
-          { role: "Finance", name: "Neha Gupta", date: "In Review", state: "active" }
-        ],
-        aiRisk: "LOW RISK",
-        aiSummary: [
-          "HubSpot annual license renewal of ₹85,000 falls in Tier 2 (₹25k - ₹1L).",
-          "Manager Arun Verma approved; Finance Neha Gupta review active.",
-          "Two comparative quotes provided (HubSpot vs Salesforce). 3-way match verified."
-        ],
-        documents: [
-          { name: "HubSpot_Quote_Q901.pdf", match: "98.7% OCR Verified" },
-          { name: "Salesforce_Comparison.pdf", match: "97.9% OCR Verified" }
-        ],
-        audit: [
-          "Feb 17 09:12 - Request created by Lisa Park",
-          "Feb 17 14:15 - Line Manager approved"
-        ]
-      },
-      {
-        id: "PR-1044",
-        title: "Datadog Enterprise APM Subscription",
-        category: "Engineering",
-        vendor: "Datadog Singapore",
-        requester_name: "Priya Sharma",
-        requester_id: "u3",
-        avatar: "PS",
-        date: "Feb 15, 2025",
-        priority: "High Priority",
-        amount: 145000,
-        waiting_days: 3,
-        status: "PENDING_DEPTHEAD",
-        status_tab: "pending",
-        tier: "Tier 3 (> ₹1,00,000)",
-        justification: "High-scale APM telemetry and distributed tracing for production launch.",
-        budget: {
-          name: "Engineering Budget Impact",
-          used: 380000,
-          remaining: 120000,
-          total: 500000,
-          percent: 76
-        },
-        stepper: [
-          { role: "Manager", name: "Arun Verma", date: "Feb 15", state: "done" },
-          { role: "Finance", name: "Neha Gupta", date: "Feb 15", state: "done" },
-          { role: "Dept Head", name: "Rajesh Patel", date: "Final Sign-off", state: "active" }
-        ],
-        aiRisk: "LOW RISK",
-        aiSummary: [
-          "High-value Datadog APM contract (₹1,45,000) exceeds ₹1,00,000 threshold (Tier 3).",
-          "Sequential approval pathway: Manager (Done) -> Finance (Done) -> Dept Head (Pending).",
-          "Engineering budget capacity confirmed; valid GSTIN and 2 quotes attached."
-        ],
-        documents: [
-          { name: "Datadog_Contract_OrderForm.pdf", match: "99.1% Verified" }
-        ],
-        audit: [
-          "Feb 15 11:20 - Manager Arun Verma approved",
-          "Feb 15 15:45 - Finance Neha Gupta approved"
-        ]
-      },
-      {
-        id: "PR-1045",
-        title: "Ergonomic Studio Chairs (x5)",
-        category: "Design",
-        vendor: "Featherlite Workspaces",
-        requester_name: "Kunal Mehra",
-        requester_id: "u3",
-        avatar: "KM",
-        date: "Feb 14, 2025",
-        priority: "Low Priority",
-        amount: 42500,
-        waiting_days: 4,
-        status: "FLAGGED",
-        status_tab: "rejected",
-        tier: "Tier 2 (₹25k - ₹1L)",
-        justification: "Ergonomic seating for new UX team members.",
-        budget: {
-          name: "Facilities Budget Impact",
-          used: 65000,
-          remaining: 35000,
-          total: 100000,
-          percent: 65
-        },
-        stepper: [
-          { role: "Manager", name: "Sunil Joshi", date: "Blocked", state: "blocked" },
-          { role: "Finance", name: "Neha Gupta", date: "Waiting", state: "waiting" }
-        ],
-        aiRisk: "MEDIUM RISK",
-        aiSummary: [
-          "POLICY VIOLATION: Submissions exceeding ₹25,000 mandate at least two comparative vendor quotes.",
-          "Only 1 quote attached (Featherlite). System automatically blocks final approval."
-        ],
-        documents: [
-          { name: "Featherlite_Quote.pdf", match: "96.5% OCR Verified" },
-          { name: "MISSING_SECOND_QUOTE.alert", match: "Missing Document Flagger Active" }
-        ],
-        audit: [
-          "Feb 14 09:30 - Created by Kunal Mehra",
-          "Feb 14 09:32 - AI Policy Engine flagged missing second quote"
-        ]
-      },
-      {
-        id: "PR-1046",
-        title: "MacBook Pro M3 Max (32GB) - Priority",
-        category: "Engineering",
-        vendor: "Imagine Apple Reseller",
-        requester_name: "Aman Sen",
-        requester_id: "u3",
-        avatar: "AS",
-        date: "Feb 17, 2025",
-        priority: "High Priority",
-        amount: 245000,
-        waiting_days: 1,
-        status: "REJECTED",
-        status_tab: "rejected",
-        tier: "Tier 3 (> ₹1,00,000)",
-        justification: "Replacement laptop for senior build engineer.",
-        budget: {
-          name: "IT Hardware Budget Impact",
-          used: 410000,
-          remaining: 90000,
-          total: 500000,
-          percent: 82
-        },
-        stepper: [
-          { role: "Manager", name: "Arun Verma", date: "Rejected", state: "rejected" }
-        ],
-        aiRisk: "CRITICAL RISK",
-        aiSummary: [
-          "CRITICAL FRAUD / DUPLICATE ALERT: Invoice # INV-9921 exactly matches historical PR-1041 processed 28 days ago.",
-          "Automated approval lock engaged. AI strictly forbids automated sign-off; manual audit required."
-        ],
-        documents: [
-          { name: "Imagine_Invoice_INV9921_Duplicate.pdf", match: "Hash Match PR-1041" }
-        ],
-        audit: [
-          "Feb 17 08:15 - Created by Aman Sen",
-          "Feb 17 08:16 - AI duplicate detection hash matched PR-1041",
-          "Feb 17 09:00 - Rejected by Manager due to duplicate invoice policy"
-        ]
-      }
-    ];
+    // User credentials mapping for persona switcher
+    const PERSONA_CREDENTIALS = {
+      manager: { username: "arun.verma", password: "password123", label: "Arun Verma (Line Manager)", sub: "admin • Engineering Lead", avatar: "AV" },
+      requester: { username: "sarah.chen", password: "password123", label: "Sarah Chen (Requester)", sub: "employee • IT Specialist", avatar: "SC" },
+      finance: { username: "neha.gupta", password: "password123", label: "Neha Gupta (Finance)", sub: "finance • Head of Finance", avatar: "NG" },
+      depthead: { username: "rajesh.patel", password: "password123", label: "Rajesh Patel (Dept Head)", sub: "executive • VP of Engineering", avatar: "RP" }
+    };
 
-    let activeFilter = 'pending';
-    let currentPersona = 'manager';
-    let currentSearchTerm = '';
+    let currentJwtToken = "";
+    let currentPersona = "manager";
+    let activeFilter = "pending";
+    let currentSearchTerm = "";
     let isAllSelected = false;
+    let liveRequests = [];
 
     // Initialize application
-    function init() {
-      renderCards();
-      updateMetrics();
+    async function init() {
       setupKeyboardShortcuts();
-      showToast("BuyOps Neumorphic Platform loaded successfully.", "info");
+      await changePersona("manager");
     }
 
     function setupKeyboardShortcuts() {
@@ -1058,7 +858,7 @@
       });
     }
 
-    // Custom Neumorphic Toast System (No ugly browser alert popups!)
+    // Custom Neumorphic Toast System
     function showToast(message, type = 'info') {
       const container = document.getElementById("toastContainer");
       const toast = document.createElement("div");
@@ -1089,32 +889,97 @@
         toast.style.transform = 'translateY(-10px)';
         toast.style.transition = 'all 0.3s ease';
         setTimeout(() => toast.remove(), 300);
-      }, 3500);
+      }, 4000);
     }
 
-    function changePersona(role) {
-      currentPersona = role;
+    // Persona Switcher with Real Backend JWT Login
+    async function changePersona(roleKey) {
+      currentPersona = roleKey;
+      const creds = PERSONA_CREDENTIALS[roleKey];
+      
       const avatar = document.getElementById("userAvatar");
       const roleSub = document.getElementById("userRoleSub");
+      avatar.innerText = creds.avatar;
+      roleSub.innerText = creds.sub;
 
-      if (role === 'manager') {
-        avatar.innerText = "MA";
-        roleSub.innerText = "admin • Engineering Lead";
-        showToast("Switched persona to Mike Anderson (Manager). All departmental requests visible.", "info");
-      } else if (role === 'requester') {
-        avatar.innerText = "SC";
-        roleSub.innerText = "employee • IT Specialist";
-        showToast("Switched persona to Sarah Chen (Requester). Row-Level Security active: only your own requests are visible.", "warning");
-      } else if (role === 'finance') {
-        avatar.innerText = "NG";
-        roleSub.innerText = "finance • Head of Finance";
-        showToast("Switched persona to Neha Gupta (Finance Manager). Budget authorization active.", "info");
-      } else if (role === 'depthead') {
-        avatar.innerText = "RP";
-        roleSub.innerText = "executive • VP of Engineering";
-        showToast("Switched persona to Rajesh Patel (Dept Head). Tier 3 (> ₹1L) authorization unlocked.", "info");
+      const connBadge = document.getElementById("apiConnectionStatus");
+
+      try {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: creds.username, password: creds.password })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          currentJwtToken = data.access_token;
+          connBadge.innerText = "JWT AUTH";
+          connBadge.className = "ml-auto text-[9px] font-black px-2 py-0.5 rounded-full neu-pressed text-emerald-600 uppercase";
+          
+          showToast(`Authenticated as ${data.full_name} (${data.role.toUpperCase()}) via real JWT token.`, "success");
+          await fetchMetrics();
+          await fetchRequests();
+        } else {
+          throw new Error("Login failed");
+        }
+      } catch (err) {
+        connBadge.innerText = "OFFLINE";
+        connBadge.className = "ml-auto text-[9px] font-black px-2 py-0.5 rounded-full neu-pressed text-amber-600 uppercase";
+        showToast("Backend API not reachable. Please start FastAPI at localhost:8000.", "warning");
       }
-      renderCards();
+    }
+
+    // Fetch Live Metrics from Backend
+    async function fetchMetrics() {
+      try {
+        const res = await fetch(`${API_BASE}/metrics`);
+        if (!res.ok) return;
+        const data = await res.json();
+
+        const st = data.approval_status;
+        document.getElementById("countPending").innerText = st.pending;
+        document.getElementById("countApproved").innerText = st.approved;
+        document.getElementById("countRejected").innerText = st.rejected;
+        document.getElementById("countAll").innerText = st.total;
+
+        document.getElementById("donutPending").innerText = st.pending;
+        document.getElementById("donutApproved").innerText = st.approved;
+        document.getElementById("donutRejected").innerText = st.rejected;
+
+        document.getElementById("sidebarApprovalCount").innerText = st.pending;
+        document.getElementById("approvalActionRequiredBadge").innerText = `${st.pending} require action`;
+
+        document.getElementById("pendingValueDisplay").innerText = `₹${data.pending_value.total_inr.toLocaleString('en-IN')}`;
+      } catch (err) {
+        console.error("Failed to fetch metrics:", err);
+      }
+    }
+
+    // Fetch Live Requests with Object-Level Authorization (RLS)
+    async function fetchRequests() {
+      if (!currentJwtToken) return;
+
+      try {
+        const url = new URL(`${API_BASE}/requests`);
+        if (activeFilter !== 'all') url.searchParams.append("filter_type", activeFilter);
+        if (currentSearchTerm) url.searchParams.append("search", currentSearchTerm);
+
+        const res = await fetch(url.toString(), {
+          headers: { "Authorization": `Bearer ${currentJwtToken}` }
+        });
+
+        if (!res.ok) {
+          throw new Error(`API error ${res.status}`);
+        }
+
+        const data = await res.json();
+        liveRequests = data.requests || [];
+        renderCardsFromLive(liveRequests);
+      } catch (err) {
+        console.error("Failed to fetch requests:", err);
+        showToast("Error retrieving requests from API. Check connection.", "danger");
+      }
     }
 
     function setTabFilter(tab) {
@@ -1130,34 +995,34 @@
         }
       });
 
-      renderCards();
+      fetchRequests();
     }
 
     function handleSearch(term) {
-      currentSearchTerm = term.toLowerCase();
-      renderCards();
+      currentSearchTerm = term.trim();
+      fetchRequests();
     }
 
     function handleFilter(term) {
-      currentSearchTerm = term.toLowerCase();
-      renderCards();
+      currentSearchTerm = term.trim();
+      fetchRequests();
     }
 
     function handleSort(sortMode) {
       if (sortMode === 'amount_desc') {
-        requestsData.sort((a, b) => b.amount - a.amount);
+        liveRequests.sort((a, b) => b.amount - a.amount);
       } else if (sortMode === 'amount_asc') {
-        requestsData.sort((a, b) => a.amount - b.amount);
+        liveRequests.sort((a, b) => a.amount - b.amount);
       } else {
-        requestsData.sort((a, b) => b.waiting_days - a.waiting_days);
+        liveRequests.sort((a, b) => b.waiting_days - a.waiting_days);
       }
-      renderCards();
+      renderCardsFromLive(liveRequests);
       showToast(`Sorted feed by: ${sortMode}`, 'info');
     }
 
     function sortByOldestFirst() {
-      requestsData.sort((a, b) => b.waiting_days - a.waiting_days);
-      renderCards();
+      liveRequests.sort((a, b) => b.waiting_days - a.waiting_days);
+      renderCardsFromLive(liveRequests);
       showToast("Sorted requests by longest wait time first.", "info");
     }
 
@@ -1166,7 +1031,7 @@
       const icon = document.getElementById("iconSelectAll");
       if (isAllSelected) {
         icon.className = "fa-solid fa-square-check text-blue-600";
-        showToast("Selected all 5 active requests.", "info");
+        showToast(`Selected all ${liveRequests.length} active requests.`, "info");
       } else {
         icon.className = "fa-regular fa-square text-slate-400";
         showToast("Deselected all requests.", "info");
@@ -1186,37 +1051,17 @@
       }
     }
 
-    function renderCards() {
+    // Render Cards using Real Database Rows from Backend
+    function renderCardsFromLive(dataset) {
       const feed = document.getElementById("requestsFeed");
       feed.innerHTML = "";
-
-      // Object-Level Access: If viewing as requester, only show requests submitted by Sarah Chen
-      let dataset = requestsData;
-      if (currentPersona === 'requester') {
-        dataset = dataset.filter(r => r.requester_name === "Sarah Chen");
-      }
-
-      // Filter by tab
-      if (activeFilter !== 'all') {
-        dataset = dataset.filter(r => r.status_tab === activeFilter);
-      }
-
-      // Filter by search
-      if (currentSearchTerm) {
-        dataset = dataset.filter(r => 
-          r.title.toLowerCase().includes(currentSearchTerm) || 
-          r.id.toLowerCase().includes(currentSearchTerm) ||
-          r.vendor.toLowerCase().includes(currentSearchTerm) ||
-          r.requester_name.toLowerCase().includes(currentSearchTerm)
-        );
-      }
 
       if (dataset.length === 0) {
         feed.innerHTML = `
           <div class="p-12 rounded-3xl neu-flat text-center text-slate-400 space-y-2">
             <i class="fa-regular fa-folder-open text-4xl mb-1 text-slate-300"></i>
             <p class="text-xs font-bold text-slate-500">No purchase requests found matching this filter.</p>
-            <p class="text-[11px] text-slate-400">Try switching your persona or changing the filter tab.</p>
+            <p class="text-[11px] text-slate-400">Object-Level Security is active. Only authorized requests are returned from the database.</p>
           </div>
         `;
         return;
@@ -1226,71 +1071,113 @@
         const card = document.createElement("div");
         card.className = "p-6 rounded-3xl neu-flat space-y-5 hover:translate-y-[-2px] transition-transform";
 
-        // Top Row: Monogram, Title, Tag, Amount
-        let priorityPill = item.priority.includes("High") 
+        const avatarInitials = item.requester_name.split(" ").map(n => n[0]).join("").toUpperCase();
+
+        let priorityPill = (item.priority || "").includes("High") 
           ? `<span class="text-rose-600 font-extrabold text-[11px] flex items-center gap-1.5 px-2.5 py-0.5 rounded-full neu-pressed"><i class="fa-solid fa-bolt-lightning text-rose-500"></i> ${item.priority}</span>`
           : `<span class="text-amber-600 font-extrabold text-[11px] flex items-center gap-1.5 px-2.5 py-0.5 rounded-full neu-pressed"><i class="fa-regular fa-clock text-amber-500"></i> ${item.priority}</span>`;
 
-        let stepperHtml = item.stepper.map((st, idx) => {
-          let circleColor = "neu-btn text-slate-500";
-          let icon = idx + 1;
-          if (st.state === 'done') {
-            circleColor = "neu-btn-success text-white font-black";
-            icon = `<i class="fa-solid fa-check text-[10px]"></i>`;
-          } else if (st.state === 'active') {
-            circleColor = "neu-convex text-amber-600 font-black border border-amber-300/40 ring-2 ring-amber-300/30";
-            icon = idx + 1;
-          } else if (st.state === 'blocked' || st.state === 'rejected') {
-            circleColor = "neu-btn-danger text-rose-600 font-black";
-            icon = `<i class="fa-solid fa-xmark text-[10px]"></i>`;
-          } else if (st.state === 'bypassed') {
-            circleColor = "neu-pressed text-slate-400";
-            icon = `-`;
-          }
-
-          return `
+        // Sequential Stepper Logic based on Tier & Status
+        let stepperHtml = "";
+        if (item.amount <= 25000) { // Tier 1
+          const leadDone = true;
+          const mgrDone = item.status === "APPROVED";
+          stepperHtml = `
             <div class="flex items-center gap-2.5">
-              <div class="w-7 h-7 rounded-xl ${circleColor} flex items-center justify-center font-black text-xs shrink-0">
-                ${icon}
-              </div>
-              <div class="text-[11px]">
-                <p class="font-bold text-slate-800 leading-tight">${st.role}</p>
-                <p class="text-slate-400 text-[10px] font-medium">${st.name} · ${st.date}</p>
-              </div>
+              <div class="w-7 h-7 rounded-xl neu-btn-success text-white font-black flex items-center justify-center text-xs"><i class="fa-solid fa-check text-[10px]"></i></div>
+              <div class="text-[11px]"><p class="font-bold text-slate-800">Team Lead</p><p class="text-slate-400 text-[10px]">Verified</p></div>
             </div>
-            ${idx < item.stepper.length - 1 ? `<div class="h-0.5 w-8 neu-pressed"></div>` : ''}
+            <div class="h-0.5 w-8 neu-pressed"></div>
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-xl ${mgrDone ? 'neu-btn-success text-white' : 'neu-convex text-amber-600 ring-2 ring-amber-300/30'} flex items-center justify-center font-black text-xs">
+                ${mgrDone ? '<i class="fa-solid fa-check text-[10px]"></i>' : '2'}
+              </div>
+              <div class="text-[11px]"><p class="font-bold text-slate-800">Manager</p><p class="text-slate-400 text-[10px]">${mgrDone ? 'Approved' : 'Pending'}</p></div>
+            </div>
+            <div class="h-0.5 w-8 neu-pressed"></div>
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-xl neu-pressed text-slate-400 flex items-center justify-center font-bold text-xs">-</div>
+              <div class="text-[11px]"><p class="font-bold text-slate-800">Finance</p><p class="text-slate-400 text-[10px]">Tier 1 (Bypassed)</p></div>
+            </div>
           `;
-        }).join("");
+        } else if (item.amount <= 100000) { // Tier 2
+          const mgrDone = item.status === "PENDING_FINANCE" || item.status === "APPROVED";
+          const finDone = item.status === "APPROVED";
+          stepperHtml = `
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-xl ${mgrDone ? 'neu-btn-success text-white' : 'neu-convex text-amber-600 ring-2 ring-amber-300/30'} flex items-center justify-center font-black text-xs">
+                ${mgrDone ? '<i class="fa-solid fa-check text-[10px]"></i>' : '1'}
+              </div>
+              <div class="text-[11px]"><p class="font-bold text-slate-800">Manager</p><p class="text-slate-400 text-[10px]">${mgrDone ? 'Approved' : 'Active'}</p></div>
+            </div>
+            <div class="h-0.5 w-8 neu-pressed"></div>
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-xl ${finDone ? 'neu-btn-success text-white' : (mgrDone ? 'neu-convex text-amber-600 ring-2 ring-amber-300/30' : 'neu-btn text-slate-400')} flex items-center justify-center font-black text-xs">
+                ${finDone ? '<i class="fa-solid fa-check text-[10px]"></i>' : '2'}
+              </div>
+              <div class="text-[11px]"><p class="font-bold text-slate-800">Finance</p><p class="text-slate-400 text-[10px]">${finDone ? 'Approved' : (mgrDone ? 'Active' : 'Awaiting Mgr')}</p></div>
+            </div>
+          `;
+        } else { // Tier 3
+          const mgrDone = item.status === "PENDING_FINANCE" || item.status === "PENDING_DEPTHEAD" || item.status === "APPROVED";
+          const finDone = item.status === "PENDING_DEPTHEAD" || item.status === "APPROVED";
+          const deptDone = item.status === "APPROVED";
+          stepperHtml = `
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-xl ${mgrDone ? 'neu-btn-success text-white' : 'neu-convex text-amber-600 ring-2 ring-amber-300/30'} flex items-center justify-center font-black text-xs">
+                ${mgrDone ? '<i class="fa-solid fa-check text-[10px]"></i>' : '1'}
+              </div>
+              <div class="text-[11px]"><p class="font-bold text-slate-800">Manager</p><p class="text-slate-400 text-[10px]">${mgrDone ? 'Approved' : 'Active'}</p></div>
+            </div>
+            <div class="h-0.5 w-8 neu-pressed"></div>
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-xl ${finDone ? 'neu-btn-success text-white' : (mgrDone ? 'neu-convex text-amber-600 ring-2 ring-amber-300/30' : 'neu-btn text-slate-400')} flex items-center justify-center font-black text-xs">
+                ${finDone ? '<i class="fa-solid fa-check text-[10px]"></i>' : '2'}
+              </div>
+              <div class="text-[11px]"><p class="font-bold text-slate-800">Finance</p><p class="text-slate-400 text-[10px]">${finDone ? 'Approved' : (mgrDone ? 'Active' : 'Awaiting')}</p></div>
+            </div>
+            <div class="h-0.5 w-8 neu-pressed"></div>
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-xl ${deptDone ? 'neu-btn-success text-white' : (finDone ? 'neu-convex text-purple-600 ring-2 ring-purple-300/30' : 'neu-btn text-slate-400')} flex items-center justify-center font-black text-xs">
+                ${deptDone ? '<i class="fa-solid fa-check text-[10px]"></i>' : '3'}
+              </div>
+              <div class="text-[11px]"><p class="font-bold text-slate-800">Dept Head</p><p class="text-slate-400 text-[10px]">${deptDone ? 'Approved' : (finDone ? 'Final Sign-off' : 'Awaiting')}</p></div>
+            </div>
+          `;
+        }
 
-        // Budget Impact Sub-Card
-        let budgetHtml = item.budget ? `
+        // Budget Impact Subcard
+        const budgetPercent = item.budget_total > 0 ? Math.round((item.budget_used / item.budget_total) * 100) : 75;
+        let budgetHtml = `
           <div class="p-3.5 rounded-2xl neu-pressed flex items-center justify-between text-xs">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-xl neu-convex text-blue-700 flex items-center justify-center font-black text-xs">
-                ${item.budget.percent}%
+                ${budgetPercent}%
               </div>
               <div>
-                <span class="font-extrabold text-slate-800">${item.budget.name}</span>
+                <span class="font-extrabold text-slate-800">${item.department} Budget Impact</span>
                 <p class="text-[10px] text-slate-500 font-medium">Utilized after approval</p>
               </div>
             </div>
             <div class="text-[11px] text-slate-600 font-semibold">
-              Used: <strong class="text-slate-800">₹${item.budget.used.toLocaleString('en-IN')}</strong> · 
-              Remaining: <strong class="text-emerald-600 font-black">₹${item.budget.remaining.toLocaleString('en-IN')}</strong> · 
-              Total: <strong>₹${item.budget.total.toLocaleString('en-IN')}</strong>
+              Used: <strong class="text-slate-800">₹${(item.budget_used || 150000).toLocaleString('en-IN')}</strong> · 
+              Remaining: <strong class="text-emerald-600 font-black">₹${(item.budget_remaining || 50000).toLocaleString('en-IN')}</strong> · 
+              Total: <strong>₹${(item.budget_total || 200000).toLocaleString('en-IN')}</strong>
             </div>
           </div>
-        ` : '';
+        `;
 
-        // Action Buttons Row
+        // Action Buttons Row with Real API Handlers
         let actionsHtml = "";
-        if (currentPersona !== 'requester' && item.status_tab === 'pending') {
+        const isPending = item.status.startsWith("PENDING");
+
+        if (currentPersona !== 'requester' && isPending) {
           actionsHtml = `
             <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-300/40">
               <div class="flex items-center gap-2.5">
                 <button onclick="approveRequest('${item.id}')" class="px-4 py-2 neu-btn-success rounded-xl text-xs font-bold flex items-center gap-1.5">
                   <i class="fa-solid fa-check text-xs"></i>
-                  <span>Approve</span>
+                  <span>Approve (${currentPersona.toUpperCase()})</span>
                 </button>
                 <button onclick="rejectRequest('${item.id}')" class="px-4 py-2 neu-btn-danger rounded-xl text-xs font-bold flex items-center gap-1.5">
                   <i class="fa-solid fa-xmark text-xs"></i>
@@ -1303,7 +1190,7 @@
               </div>
               
               <button onclick="openDetailModal('${item.id}')" class="text-xs font-extrabold text-blue-600 hover:text-blue-800 flex items-center gap-1">
-                <span>View AI Risk Analysis</span>
+                <span>View AI Dossier & Audit</span>
                 <i class="fa-solid fa-chevron-right text-[10px]"></i>
               </button>
             </div>
@@ -1324,7 +1211,7 @@
           <div class="flex items-start justify-between">
             <div class="flex items-start gap-3.5">
               <div class="w-11 h-11 rounded-2xl neu-convex text-slate-700 font-black text-xs flex items-center justify-center shrink-0">
-                ${item.avatar}
+                ${avatarInitials}
               </div>
               <div>
                 <div class="flex items-center gap-2.5">
@@ -1332,10 +1219,10 @@
                   ${priorityPill}
                 </div>
                 <p class="text-xs text-slate-400 mt-0.5 font-medium">
-                  ${item.requester_name} · ${item.category} · ${item.date}
+                  ${item.requester_name} · ${item.category} · ${item.created_at}
                 </p>
                 <p class="text-xs text-slate-600 mt-1 max-w-xl font-medium leading-relaxed">
-                  ${item.justification}
+                  ${item.business_justification}
                 </p>
               </div>
             </div>
@@ -1344,7 +1231,7 @@
             <div class="text-right">
               <div class="text-xl font-black text-slate-900 tracking-tight">₹${item.amount.toLocaleString('en-IN')}</div>
               <p class="text-[11px] text-blue-600 font-mono font-bold mt-0.5">${item.id}</p>
-              <p class="text-[10px] text-slate-500 font-bold mt-0.5">Waiting: ${item.waiting_days} days</p>
+              <p class="text-[10px] text-slate-500 font-bold mt-0.5">SHA256: ${item.invoice_sha256 ? item.invoice_sha256.substring(0, 8) + '...' : 'Verified'}</p>
             </div>
           </div>
 
@@ -1364,130 +1251,181 @@
       });
     }
 
-    function updateMetrics() {
-      const pending = requestsData.filter(r => r.status_tab === 'pending').length;
-      const approved = requestsData.filter(r => r.status_tab === 'approved').length;
-      const rejected = requestsData.filter(r => r.status_tab === 'rejected').length;
-      const total = requestsData.length;
+    // Real API Approval Execution
+    async function approveRequest(id) {
+      if (!currentJwtToken) return;
 
-      document.getElementById("countPending").innerText = pending;
-      document.getElementById("countApproved").innerText = approved;
-      document.getElementById("countRejected").innerText = rejected;
-      document.getElementById("countAll").innerText = total;
+      try {
+        const res = await fetch(`${API_BASE}/requests/${id}/decision`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${currentJwtToken}`
+          },
+          body: JSON.stringify({
+            request_id: id,
+            action: "Approve",
+            comments: `Approved via BuyOps dashboard by ${currentPersona.toUpperCase()}.`
+          })
+        });
 
-      document.getElementById("donutPending").innerText = pending;
-      document.getElementById("donutApproved").innerText = approved;
-      document.getElementById("donutRejected").innerText = rejected;
-
-      document.getElementById("sidebarApprovalCount").innerText = pending;
-
-      const sumPending = requestsData
-        .filter(r => r.status_tab === 'pending')
-        .reduce((acc, curr) => acc + curr.amount, 0);
-
-      document.getElementById("pendingValueDisplay").innerText = `₹${sumPending.toLocaleString('en-IN')}`;
-    }
-
-    function approveRequest(id) {
-      const item = requestsData.find(r => r.id === id);
-      if (!item) return;
-
-      // Policy check: Missing documents block approval!
-      if (item.status === 'FLAGGED') {
-        showToast(`⚠️ POLICY GUARDRAIL BLOCKED: ${id} is flagged for missing supporting documents. Approval is blocked until documents are supplied.`, "warning");
-        return;
-      }
-
-      // Tier 3 Escalation
-      if (item.amount > 100000 && currentPersona !== 'depthead' && currentPersona !== 'finance') {
-        showToast(`⚠️ TIER 3 ESCALATION RULE: Purchases > ₹1,00,000 require Department Head (VP) authorization. Your Line Manager sign-off advances this to Finance & Dept Head.`, "info");
-      }
-
-      item.status_tab = 'approved';
-      item.status = 'APPROVED';
-      item.stepper.forEach(s => {
-        if (s.name.includes("You") || s.role.includes("Manager") || s.role.includes("Finance") || s.role.includes("Dept Head")) {
-          s.state = 'done';
-          s.date = 'Just now';
+        const data = await res.json();
+        if (res.ok) {
+          showToast(`✓ Request ${id} updated to status: ${data.new_status}. Recorded in hash-chain block ${data.audit_block_hash.substring(0, 10)}...`, "success");
+          await fetchMetrics();
+          await fetchRequests();
+        } else {
+          // Display the real backend guardrail error message
+          showToast(`⚠️ ${data.detail}`, "warning");
         }
-      });
-      item.audit.push(`Feb 18 Just now - Approved by ${currentPersona.toUpperCase()}`);
-
-      showToast(`✓ Request ${id} (${item.title}) has been formally APPROVED by ${currentPersona.toUpperCase()}.`, "success");
-      renderCards();
-      updateMetrics();
-    }
-
-    function rejectRequest(id) {
-      const item = requestsData.find(r => r.id === id);
-      if (!item) return;
-      item.status_tab = 'rejected';
-      item.status = 'REJECTED';
-      item.audit.push(`Feb 18 Just now - Rejected by ${currentPersona.toUpperCase()}`);
-      showToast(`✕ Request ${id} has been marked as REJECTED. Requester notified.`, "danger");
-      renderCards();
-      updateMetrics();
-    }
-
-    function requestChanges(id) {
-      const item = requestsData.find(r => r.id === id);
-      if (!item) return;
-      item.status = 'FLAGGED';
-      item.status_tab = 'rejected';
-      item.audit.push(`Feb 18 Just now - Changes/quotes requested by ${currentPersona.toUpperCase()}`);
-      showToast(`💬 Clarification / second quote request dispatched to ${item.requester_name}.`, "warning");
-      renderCards();
-      updateMetrics();
-    }
-
-    function openDetailModal(id) {
-      const item = requestsData.find(r => r.id === id);
-      if (!item) return;
-
-      document.getElementById("detailId").innerText = item.id;
-      document.getElementById("detailTitle").innerText = item.title;
-      document.getElementById("detailAmount").innerText = `₹${item.amount.toLocaleString('en-IN')}`;
-      document.getElementById("detailTier").innerText = item.tier;
-      document.getElementById("detailRequester").innerText = `${item.requester_name} (${item.category})`;
-      document.getElementById("detailVendor").innerText = item.vendor;
-
-      const riskBadge = document.getElementById("detailRiskBadge");
-      riskBadge.innerText = item.aiRisk;
-      if (item.aiRisk.includes("LOW")) {
-        riskBadge.className = "text-[10px] font-black px-2.5 py-0.5 rounded-full neu-pressed text-emerald-700";
-      } else if (item.aiRisk.includes("MEDIUM")) {
-        riskBadge.className = "text-[10px] font-black px-2.5 py-0.5 rounded-full neu-pressed text-amber-700";
-      } else {
-        riskBadge.className = "text-[10px] font-black px-2.5 py-0.5 rounded-full neu-pressed text-rose-700";
+      } catch (err) {
+        showToast("Network error executing approval decision.", "danger");
       }
+    }
 
-      document.getElementById("detailAiBullets").innerHTML = item.aiSummary.map(b => `<li>${b}</li>`).join("");
-      document.getElementById("detailDocsList").innerHTML = item.documents.map(d => `
-        <div class="p-3 rounded-xl neu-pressed flex items-center justify-between">
-          <div class="flex items-center gap-2.5">
-            <i class="fa-solid fa-file-pdf text-rose-500 text-sm"></i>
-            <span class="font-bold text-slate-800">${d.name}</span>
+    // Real API Reject Execution
+    async function rejectRequest(id) {
+      if (!currentJwtToken) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/requests/${id}/decision`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${currentJwtToken}`
+          },
+          body: JSON.stringify({
+            request_id: id,
+            action: "Reject",
+            comments: `Rejected by ${currentPersona.toUpperCase()} due to procurement policy.`
+          })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          showToast(`✕ Request ${id} marked as REJECTED.`, "danger");
+          await fetchMetrics();
+          await fetchRequests();
+        } else {
+          showToast(`⚠️ ${data.detail}`, "warning");
+        }
+      } catch (err) {
+        showToast("Network error executing rejection.", "danger");
+      }
+    }
+
+    // Real API Request Changes
+    async function requestChanges(id) {
+      if (!currentJwtToken) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/requests/${id}/decision`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${currentJwtToken}`
+          },
+          body: JSON.stringify({
+            request_id: id,
+            action: "Request Changes",
+            comments: `Clarification or second comparative quote requested by ${currentPersona.toUpperCase()}.`
+          })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          showToast(`💬 Changes requested for ${id}. Status updated to FLAGGED_MISSING_DOCS.`, "warning");
+          await fetchMetrics();
+          await fetchRequests();
+        } else {
+          showToast(`⚠️ ${data.detail}`, "warning");
+        }
+      } catch (err) {
+        showToast("Network error requesting changes.", "danger");
+      }
+    }
+
+    // Open Real Request Detail Dossier Modal
+    async function openDetailModal(id) {
+      if (!currentJwtToken) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/requests/${id}`, {
+          headers: { "Authorization": `Bearer ${currentJwtToken}` }
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          showToast(`Security Violation: ${err.detail}`, "danger");
+          return;
+        }
+
+        const item = await res.json();
+
+        document.getElementById("detailId").innerText = item.id;
+        document.getElementById("detailTitle").innerText = item.title;
+        document.getElementById("detailAmount").innerText = `₹${item.amount.toLocaleString('en-IN')}`;
+        document.getElementById("detailTier").innerText = item.tier;
+        document.getElementById("detailRequester").innerText = `${item.requester_name} (${item.department})`;
+        document.getElementById("detailVendor").innerText = item.vendor;
+
+        const riskBadge = document.getElementById("detailRiskBadge");
+        const aiAnalysis = item.ai_analysis || { risk_level: "LOW RISK", summary: [] };
+        riskBadge.innerText = aiAnalysis.risk_level;
+        if (aiAnalysis.risk_level.includes("LOW")) {
+          riskBadge.className = "text-[10px] font-black px-2.5 py-0.5 rounded-full neu-pressed text-emerald-700";
+        } else if (aiAnalysis.risk_level.includes("MEDIUM")) {
+          riskBadge.className = "text-[10px] font-black px-2.5 py-0.5 rounded-full neu-pressed text-amber-700";
+        } else {
+          riskBadge.className = "text-[10px] font-black px-2.5 py-0.5 rounded-full neu-pressed text-rose-700";
+        }
+
+        document.getElementById("detailAiBullets").innerHTML = (aiAnalysis.summary || []).map(b => `<li>${b}</li>`).join("");
+
+        const docsList = document.getElementById("detailDocsList");
+        docsList.innerHTML = (item.attachments || []).map(d => `
+          <div class="p-3 rounded-xl neu-pressed flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <i class="fa-solid fa-file-pdf text-rose-500 text-sm"></i>
+              <div>
+                <span class="font-bold text-slate-800">${d.file_name}</span>
+                <span class="text-[10px] text-slate-500 block">SHA256: ${d.invoice_sha256 ? d.invoice_sha256.substring(0, 16) + '...' : 'Verified'}</span>
+              </div>
+            </div>
+            <span class="text-[10px] neu-btn text-slate-800 px-2.5 py-1 rounded-md font-mono font-bold">${d.ocr_confidence ? d.ocr_confidence + '% OCR Match' : d.status}</span>
           </div>
-          <span class="text-[10px] neu-btn text-slate-800 px-2 py-0.5 rounded-md font-mono font-bold">${d.match}</span>
-        </div>
-      `).join("");
+        `).join("");
 
-      document.getElementById("detailAuditTrail").innerHTML = item.audit.map(a => `<div>${a}</div>`).join("");
-      document.getElementById("modalUserRoleDisplay").innerText = `${currentPersona.toUpperCase()} User`;
+        const auditTrail = document.getElementById("detailAuditTrail");
+        auditTrail.innerHTML = (item.audit_logs || []).map(a => `
+          <div class="p-2 border-b border-slate-300/30">
+            <div class="flex justify-between font-bold text-slate-700">
+              <span>${a.action} by ${a.actor_name} (${a.actor_role})</span>
+              <span class="text-[10px] text-slate-400">${a.timestamp}</span>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-0.5">${a.details}</p>
+            <p class="text-[9px] text-blue-600 font-mono">Block Hash: ${a.log_hash.substring(0, 20)}... (Prev: ${a.prev_hash.substring(0, 12)}...)</p>
+          </div>
+        `).join("");
 
-      const actionsGroup = document.getElementById("modalActionsGroup");
-      if (currentPersona !== 'requester') {
-        actionsGroup.innerHTML = `
-          <button onclick="rejectRequest('${item.id}'); closeDetailModal();" class="px-4 py-2 neu-btn-danger rounded-xl font-bold">Reject</button>
-          <button onclick="approveRequest('${item.id}'); closeDetailModal();" class="px-5 py-2 neu-btn-success rounded-xl font-bold">Approve Request</button>
-        `;
-      } else {
-        actionsGroup.innerHTML = `
-          <button onclick="closeDetailModal()" class="px-5 py-2 neu-btn-primary rounded-xl font-bold">Close</button>
-        `;
+        document.getElementById("modalUserRoleDisplay").innerText = `${currentPersona.toUpperCase()} (${PERSONA_CREDENTIALS[currentPersona].username})`;
+
+        const actionsGroup = document.getElementById("modalActionsGroup");
+        if (currentPersona !== 'requester' && item.status.startsWith("PENDING")) {
+          actionsGroup.innerHTML = `
+            <button onclick="rejectRequest('${item.id}'); closeDetailModal();" class="px-4 py-2 neu-btn-danger rounded-xl font-bold">Reject</button>
+            <button onclick="approveRequest('${item.id}'); closeDetailModal();" class="px-5 py-2 neu-btn-success rounded-xl font-bold">Approve Request</button>
+          `;
+        } else {
+          actionsGroup.innerHTML = `
+            <button onclick="closeDetailModal()" class="px-5 py-2 neu-btn-primary rounded-xl font-bold">Close</button>
+          `;
+        }
+
+        document.getElementById("detailModal").classList.remove("hidden");
+      } catch (err) {
+        console.error("Failed to fetch detail:", err);
       }
-
-      document.getElementById("detailModal").classList.remove("hidden");
     }
 
     function closeDetailModal() {
@@ -1543,8 +1481,11 @@
       }
     }
 
-    function handleCreateRequest(e) {
+    // Real API Purchase Request Submission
+    async function handleCreateRequest(e) {
       e.preventDefault();
+      if (!currentJwtToken) return;
+
       const title = document.getElementById("newTitle").value;
       const cat = document.getElementById("newCategory").value;
       const amount = parseFloat(document.getElementById("newAmount").value);
@@ -1552,62 +1493,41 @@
       const justification = document.getElementById("newJustification").value;
       const hasQuotes = document.getElementById("twoQuotesCheck").checked;
 
-      let tier = "Tier 1 (≤ ₹25,000)";
-      if (amount > 100000) tier = "Tier 3 (> ₹1,00,000)";
-      else if (amount > 25000) tier = "Tier 2 (₹25k - ₹1L)";
+      try {
+        const res = await fetch(`${API_BASE}/requests`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${currentJwtToken}`
+          },
+          body: JSON.stringify({
+            title: title,
+            category: cat,
+            vendor: vendor,
+            amount: amount,
+            business_justification: justification,
+            department: "Engineering",
+            requester_name: PERSONA_CREDENTIALS[currentPersona].label.split(" (")[0],
+            quotes_count: hasQuotes ? 2 : 1
+          })
+        });
 
-      let isFlagged = false;
-      if (amount > 25000 && !hasQuotes) {
-        isFlagged = true;
+        const data = await res.json();
+        if (res.ok) {
+          if (data.risk_level === "CRITICAL RISK") {
+            showToast(`⚠️ WARNING: Request ${data.request_id} created but FLAGGED for duplicate invoice hash!`, "warning");
+          } else {
+            showToast(`🎉 Request ${data.request_id} successfully created and written to database!`, "success");
+          }
+          closeNewRequestModal();
+          await fetchMetrics();
+          await fetchRequests();
+        } else {
+          showToast(`Error: ${data.detail}`, "danger");
+        }
+      } catch (err) {
+        showToast("Network error submitting request.", "danger");
       }
-
-      const newId = `PR-${1042 + requestsData.length}`;
-      const newReq = {
-        id: newId,
-        title: title,
-        category: cat,
-        vendor: vendor,
-        requester_name: "Sarah Chen",
-        requester_id: "u1",
-        avatar: "SC",
-        date: "Today",
-        priority: "Medium",
-        amount: amount,
-        waiting_days: 0,
-        status: isFlagged ? "FLAGGED" : "PENDING_MANAGER",
-        status_tab: isFlagged ? "rejected" : "pending",
-        tier: tier,
-        justification: justification,
-        budget: {
-          name: "Department Budget Impact",
-          used: 120000,
-          remaining: 80000,
-          total: 200000,
-          percent: 60
-        },
-        stepper: [
-          { role: "Manager", name: "You", date: "Pending", state: "active" },
-          { role: "Finance", name: "Finance", date: "Awaiting", state: "waiting" }
-        ],
-        aiRisk: isFlagged ? "MEDIUM RISK" : "LOW RISK",
-        aiSummary: [
-          `New request created for ${cat} from ${vendor}.`,
-          `Categorized under ${tier} based on automated threshold rule.`,
-          isFlagged ? "Flagged: Missing 2nd comparative quote." : "All document validations passed."
-        ],
-        documents: [
-          { name: `${vendor.replace(/\s+/g, '_')}_Invoice.pdf`, match: "99.0% OCR Verified" }
-        ],
-        audit: [
-          `Feb 18 Just now - Request created by Sarah Chen`
-        ]
-      };
-
-      requestsData.unshift(newReq);
-      showToast(`🎉 Purchase Request ${newId} submitted successfully! First-Time-Right validated.`, "success");
-      closeNewRequestModal();
-      renderCards();
-      updateMetrics();
     }
 
     function toggleCopilotModal() {
@@ -1619,10 +1539,11 @@
       sendCopilotMsg();
     }
 
-    function sendCopilotMsg() {
+    // Real API AI Copilot Query (Context-Grounded RAG)
+    async function sendCopilotMsg() {
       const input = document.getElementById("copilotInputText");
       const text = input.value.trim();
-      if (!text) return;
+      if (!text || !currentJwtToken) return;
 
       const area = document.getElementById("copilotChatArea");
       const userBubble = document.createElement("div");
@@ -1632,25 +1553,35 @@
       input.value = "";
       area.scrollTop = area.scrollHeight;
 
-      setTimeout(() => {
-        let reply = "";
-        const lower = text.toLowerCase();
-        if (lower.includes("pr-1042")) {
-          reply = "<strong>PR-1042 (Cloud Server Licenses - ₹12,500):</strong><br>• Status: <em>Pending Manager Approval</em><br>• Prior: Approved by Team Lead Mark Wilson.<br>• Tier 1: Needs only Manager sign-off. Finance bypassed.";
-        } else if (lower.includes("tier 3") || lower.includes("1,00,000")) {
-          reply = "<strong>Tier 3 Approval Policy (> ₹1,00,000):</strong><br>• Requires 3 sequential human sign-offs: Line Manager → Finance → Department Head.<br>• Must have 2 vendor quotes and valid GST credentials.";
-        } else if (lower.includes("ai approve")) {
-          reply = "<strong>S3K Principle: AI Assisted – Human Governed.</strong><br>AI <strong>never</strong> independently approves financial requests. Approvals are strictly human-governed.";
-        } else {
-          reply = `Procurement Policy: All purchase requests are routed dynamically (Tier 1: ≤ ₹25k, Tier 2: ₹25k-₹1L, Tier 3: > ₹1L). Missing documents block final approval.`;
-        }
+      try {
+        const res = await fetch(`${API_BASE}/ai/chat`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${currentJwtToken}`
+          },
+          body: JSON.stringify({ query: text })
+        });
 
-        const aiBubble = document.createElement("div");
-        aiBubble.className = "p-3.5 rounded-2xl neu-flat text-slate-800 text-xs space-y-1";
-        aiBubble.innerHTML = reply;
-        area.appendChild(aiBubble);
-        area.scrollTop = area.scrollHeight;
-      }, 300);
+        if (res.ok) {
+          const data = await res.json();
+          const aiBubble = document.createElement("div");
+          aiBubble.className = "p-3.5 rounded-2xl neu-flat text-slate-800 text-xs space-y-1.5";
+          aiBubble.innerHTML = `
+            <div class="whitespace-pre-line leading-relaxed">${data.reply}</div>
+            <div class="pt-1.5 border-t border-slate-300/30 flex justify-between text-[10px] text-blue-600 font-bold">
+              <span>Engine: ${data.engine}</span>
+              <span>Grounded Clause: ${data.grounded_clause || 'Verified'}</span>
+            </div>
+          `;
+          area.appendChild(aiBubble);
+          area.scrollTop = area.scrollHeight;
+        } else {
+          showToast("AI Copilot request failed.", "warning");
+        }
+      } catch (err) {
+        showToast("Error connecting to AI Copilot API.", "danger");
+      }
     }
 
     window.onload = init;

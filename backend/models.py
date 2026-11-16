@@ -1,14 +1,31 @@
 """
-Pydantic Models and Data Contracts for FlowSync AI
-Case Study 03: Enterprise Request & Approval Platform
+Pydantic Schemas and Contracts
+FlowSync / BuyOps AI - S3K Case Study 03
 """
 
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 
-class UserAuth(BaseModel):
+class LoginRequest(BaseModel):
+    username: str = Field(..., min_length=2, max_length=50)
+    password: str = Field(..., min_length=4)
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user_id: str
+    role: str
+    full_name: str
+    department: str
+
+class UserProfile(BaseModel):
+    id: str
     username: str
-    role: str # 'requester', 'manager', 'finance', 'depthead'
+    full_name: str
+    email: str
+    role: str
+    department: str
+    budget_limit: float
 
 class CreatePurchaseRequest(BaseModel):
     title: str = Field(..., min_length=3, max_length=120)
@@ -18,22 +35,15 @@ class CreatePurchaseRequest(BaseModel):
     business_justification: str = Field(..., min_length=10)
     department: Optional[str] = "Engineering"
     requester_name: Optional[str] = "Sarah Chen"
-    has_invoice: Optional[bool] = True
+    invoice_content: Optional[str] = None # text or base64 representation
+    invoice_sha256: Optional[str] = None  # direct sha256 hash if computed client-side
     quotes_count: Optional[int] = 1
 
 class ApprovalDecision(BaseModel):
     request_id: str
-    action: str # 'Approve', 'Reject', 'Request Changes'
+    action: str = Field(..., pattern="^(Approve|Reject|Request Changes)$")
     comments: Optional[str] = ""
 
 class AIChatQuery(BaseModel):
-    query: str
-    user_role: Optional[str] = "manager"
+    query: str = Field(..., min_length=1)
     request_id: Optional[str] = None
-
-class SystemMetricsResponse(BaseModel):
-    median_tat_hours: float
-    incomplete_requests_percent: float
-    total_active_requests: int
-    pending_approval_value: float
-    session_reviewed_percent: float
