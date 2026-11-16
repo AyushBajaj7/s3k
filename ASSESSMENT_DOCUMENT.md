@@ -247,13 +247,15 @@ graph LR
 
 * **Frontend:** Vanilla JavaScript + Tailwind CSS with custom Neumorphic utilities. Chosen deliberately for zero build-tooling overhead, instant local browser portability, pure DOM reactivity, and total code transparency for S3K reviewers. Connected via asynchronous `fetch()` calls carrying signed JWT Bearer tokens.
 * **Backend:** Python 3.14 with **FastAPI**. Pydantic v2 schemas provide strict runtime data validation and OpenAPI 3.1 documentation.
-* **Authentication & Authorization:** Real **PBKDF2-HMAC-SHA256** password hashing (100,000 rounds) and cryptographically signed **JWT access tokens** (`PyJWT`, HMAC-SHA256, 24-hour expiration). Arbitrary header spoofing is rejected with HTTP 401.
-* **Sequential Approval State Machine:** Strictly enforces that Stage 1 (Line Manager) must be completed before Stage 2 (Finance), and Stage 2 before Stage 3 (Department Head). Department Heads cannot approve Tier 3 requests prematurely while Finance review is pending (returns HTTP 403).
+* **Authentication & Authorization:** Real **PBKDF2-HMAC-SHA256** password hashing (100,000 rounds) and cryptographically signed **JWT access tokens** (`PyJWT`, HMAC-SHA256, 24-hour expiration) with environment secret key configuration (`.env`). Arbitrary header spoofing is rejected with HTTP 401.
+* **Department & Object-Level Access Control (RLS):** Requesters are restricted to their own requests. Line Managers have departmental jurisdiction. Finance oversees Tier 2 and Tier 3 spend (routine Tier 1 operational purchases bypass Finance and return HTTP 403). Department Heads oversee Tier 3 spend (> ₹1,00,000).
+* **Sequential Approval State Machine:** Strictly enforces that Stage 1 (Line Manager) must be completed before Stage 2 (Finance), and Stage 2 before Stage 3 (Department Head). Department Heads cannot approve Tier 3 requests prematurely while Finance review is pending (returns HTTP 403). Requesters cannot approve or reject requests (HTTP 403).
 * **AI & Fraud Prevention:**
-  1. *Real Semantic Policy RAG Engine:* Vectorized token similarity search over 5 indexed company procurement policy clauses (`POL-01-TIERS` through `POL-05-SEQUENTIAL-STAGES`).
+  1. *Semantic Policy Retrieval Engine:* Keyword-weighted token similarity search over 5 indexed company procurement policy clauses (`POL-01-TIERS` through `POL-05-SEQUENTIAL-STAGES`).
   2. *Live Gemini Integration Hook:* Connects directly to Google Gemini 1.5 Flash when `GEMINI_API_KEY` is configured in the environment.
   3. *Cryptographic Duplicate Invoice Detection:* Computes true SHA-256 digest of invoice data and detects duplicate fraud collisions against historical database records.
-  4. *Document OCR:* Structured field extraction (vendor, GSTIN, amount) with confidence scores, designed for production integration with Google Cloud Document AI or AWS Textract.
+  4. *Document OCR:* Structured procurement fields (vendor, GSTIN, amount) simulate Document AI / Textract pipeline outputs rather than binary PDF client-side OCR.
+  5. *XSS Sanitization:* Untrusted AI output is HTML-escaped and safely parsed in the frontend.
 * **Verifiable Hash-Chained Audit Ledger:** Every audit row stores `prev_hash` and `log_hash = SHA256(prev_hash + req_id + actor + role + action + details + timestamp)`. A dedicated endpoint (`GET /api/v1/audit/verify-chain`) cryptographically verifies ledger integrity from Genesis block to Head.
 * **Authentication & Authorization:** JWT bearer tokens with standard OIDC/OAuth2 integration (Google Workspace / Azure AD). Claims contain `user_id`, `department`, `role`, and `approval_limit`.
 * **AI Integration:** LiteLLM / Google Gemini API abstraction. Strict structured JSON output schemas (via Pydantic) to eliminate hallucinations.

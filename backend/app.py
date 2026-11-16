@@ -31,10 +31,19 @@ from backend.models import LoginRequest, TokenResponse, UserProfile, CreatePurch
 from backend.data_access import get_authorized_requests, get_request_dossier, execute_approval_decision
 from backend.ai_engine import answer_policy_query
 
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    seed_db()
+    yield
+
 app = FastAPI(
     title="BuyOps AI - Enterprise Request & Approval Engine",
     description="Backend service powering authenticated intake, sequential tiered approvals, and human-governed AI oversight.",
-    version="2.5.0"
+    version="2.5.0",
+    lifespan=lifespan
 )
 
 # Enable CORS for local development and browser frontend
@@ -47,12 +56,6 @@ app.add_middleware(
 )
 
 security = HTTPBearer(auto_error=False)
-
-# Ensure DB is ready on startup
-@app.on_event("startup")
-def startup_event():
-    init_db()
-    seed_db()
 
 # ---------------------------------------------------------
 # Authentication Dependency (JWT Bearer Verification)
@@ -228,7 +231,14 @@ def list_requests(
     Lists purchase requests with strict Object-Level Authorization (RLS).
     Enforced on authenticated user credentials.
     """
-    requests = get_authorized_requests(user["id"], user["role"], filter_type, search)
+    requests = get_authorized_requests(
+        user_id=user["id"],
+        user_role=user["role"],
+        user_department=user.get("department"),
+        user_name=user.get("full_name"),
+        filter_type=filter_type,
+        search=search
+    )
     return {"requests": requests, "count": len(requests), "active_user": user["full_name"], "user_role": user["role"]}
 
 @app.get("/api/v1/requests/{request_id}")
@@ -239,7 +249,13 @@ def get_request_detail(
     """
     Fetches full request dossier. Enforces BOLA/IDOR protection.
     """
-    return get_request_dossier(request_id, user["id"], user["role"])
+    return get_request_dossier(
+        request_id=request_id,
+        user_id=user["id"],
+        user_role=user["role"],
+        user_department=user.get("department"),
+        user_name=user.get("full_name")
+    )
 
 @app.post("/api/v1/requests", status_code=status.HTTP_201_CREATED)
 def create_purchase_request(

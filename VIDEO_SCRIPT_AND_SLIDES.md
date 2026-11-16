@@ -23,7 +23,7 @@
 * **Slide 2: AS-IS Bottlenecks vs. TO-BE KPIs:** Comparison table showing 5-day cycle time reduced to 18.4 hours, 28% incomplete submissions cut to 3.2%, and 90% status pings deflected.
 * **Slide 3: Workflow Architecture & Policy Tiers:** The 3 tiers (≤ ₹25k, ₹25k-₹100k, > ₹100k) with the principle: *AI Assisted – Human Governed*.
 * **Slide 4: Live Demo (Screen Share):** Walkthrough of `frontend/index.html` (BuyOps layout, Card 1 review, Budget impact donut, AI Copilot, Requester RLS view).
-* **Slide 5: Technical Stack & Security Verification:** Architecture diagram showing Vanilla JS + Tailwind CSS (Neumorphic Soft UI), Python FastAPI, SQLite/PostgreSQL, PBKDF2 + Signed JWT Auth, Sequential State Machine, Verifiable Hash-Chained Audit Ledger, and 100% UAT test results (7 automated tests).
+* **Slide 5: Technical Stack & Security Verification:** Architecture diagram showing Vanilla JS + Tailwind CSS (Neumorphic Soft UI), Python FastAPI, SQLite/PostgreSQL, PBKDF2 + Signed JWT Auth, Department & Object-Level Access Control, Sequential State Machine, Verifiable Hash-Chained Audit Ledger, and 100% UAT test results (8 automated tests).
 * **Slide 6: AI Teaching Concept & Human Ownership:** Teaching slide (*What is Context Grounding / RAG?*) + Breakdown of Human Engineering vs. AI Tools.
 
 ---
@@ -87,16 +87,17 @@
 >
 > Our architecture combines a responsive, zero-build Vanilla JavaScript and Tailwind CSS frontend styled with tactile Neumorphic Soft UI, communicating via authenticated JSON APIs with a high-performance **Python FastAPI** backend and SQLite/PostgreSQL database.
 >
-> To ensure enterprise-grade security and reliability, I authored and verified an automated test suite in `backend/test_api.py` covering seven critical integration and security scenarios:
+> To ensure enterprise-grade security and reliability, I authored and verified an automated test suite in `backend/test_api.py` covering eight critical integration and security scenarios:
 > 1. **Authentication & Tamper Defense:** Real PBKDF2-HMAC-SHA256 password hashing and cryptographically signed JWT Bearer tokens; tampered or missing tokens are strictly rejected with HTTP 401.
-> 2. **Object-Level Authorization (IDOR Defense):** Verified that a user querying another employee's request ID receives an immediate HTTP 403 Forbidden.
-> 3. **Strict Sequential Approval State Machine:** Verified that Department Heads cannot prematurely approve Tier 3 requests while Finance approval is pending; the system blocks premature sign-offs with HTTP 403.
-> 4. **Missing Document Gatekeeper:** Tested request PR-1045 with missing competitive quotes; the API returns HTTP 422, locking approval until compliance documents are attached.
-> 5. **Cryptographic Duplicate Invoice Collision Detection:** Proved that submitting an invoice with an identical SHA-256 hash automatically flags the request as CRITICAL RISK.
-> 6. **Verifiable Hash-Chained Audit Ledger:** Validated blockchain-style cryptographic linkage (`prev_hash` to `log_hash`) across all ledger blocks via `/api/v1/audit/verify-chain`.
-> 7. **Context-Grounded Semantic AI Copilot:** Verified that AI answers are mathematically grounded in company procurement policy clauses.
+> 2. **Department & Object-Level Access Control (RLS):** Verified that users are isolated to their jurisdictions: requesters cannot see peers' requests, and Finance cannot view operational Tier 1 spend that bypasses Finance.
+> 3. **Tier 2 Sequential Approval State Machine:** Department Heads cannot approve Tier 2 requests prematurely before Finance review; returns HTTP 403.
+> 4. **Tier 3 Lifecycle & Role Permission Guards:** Proven that Finance cannot approve before Manager, Department Heads cannot approve before Finance, only Department Heads can complete Tier 3, and requesters cannot approve or reject requests.
+> 5. **Missing Document Gatekeeper:** Tested request PR-1045 with missing competitive quotes; the API returns HTTP 422, locking approval until compliance documents are attached.
+> 6. **Cryptographic Duplicate Invoice Collision Detection:** Proved that submitting an invoice with an identical SHA-256 hash automatically flags the request as CRITICAL RISK.
+> 7. **Verifiable Hash-Chained Audit Ledger:** Validated blockchain-style cryptographic linkage (`prev_hash` to `log_hash`) across all ledger blocks via `/api/v1/audit/verify-chain`.
+> 8. **Context-Grounded Semantic AI Copilot:** Verified that AI answers are mathematically grounded in company procurement policy clauses.
 >
-> All 7 automated tests pass with 100% verification."
+> All 8 automated tests pass with 100% verification."
 
 ---
 
@@ -128,7 +129,7 @@
 > • I architected the Object-Level Security (RLS) model at the data-access layer to prevent IDOR leaks.
 > • I designed the cryptographic SHA-256 hash-chained audit ledger with on-demand mathematical verification.
 > • I implemented the context-grounded semantic policy RAG retrieval engine and live Gemini API hook.
-> • And I authored and verified the 7-scenario automated test suite in FastAPI.
+> • And I authored and verified the 8-scenario automated test suite in FastAPI.
 >
 > FlowSync demonstrates that when AI is paired with strict human governance, enterprise workflows become faster, transparent, and completely audit-proof.
 >

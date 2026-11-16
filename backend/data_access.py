@@ -15,11 +15,20 @@ from fastapi import HTTPException, status
 
 from .database import get_connection, append_audit_log, compute_log_hash
 
-def get_authorized_requests(user_id: str, user_role: str, filter_type: str = "all", search: Optional[str] = None) -> List[Dict[str, Any]]:
+def get_authorized_requests(
+    user_id: str,
+    user_role: str,
+    user_department: Optional[str] = None,
+    user_name: Optional[str] = None,
+    filter_type: str = "all",
+    search: Optional[str] = None
+) -> List[Dict[str, Any]]:
     """
-    Retrieves purchase requests with strict Object-Level Security:
+    Retrieves purchase requests with strict Object-Level & Department Jurisdiction Security:
     - 'requester' can ONLY see records where requester_id == user_id.
-    - 'manager', 'finance', 'depthead' see requests within their jurisdiction.
+    - 'manager' can see requests in their own department OR where designated as approver.
+    - 'finance' can see requests requiring financial review (Tier 2/3) or in Finance department.
+    - 'depthead' can see high-value requests (Tier 3 > ₹1,00,000) or in Executive division.
     """
     conn = get_connection()
     cursor = conn.cursor()
@@ -32,10 +41,19 @@ def get_authorized_requests(user_id: str, user_role: str, filter_type: str = "al
     """
     params = []
 
-    # Strict Object-Level Access Check
+    # Strict Department and Role Jurisdiction Rules
     if user_role == "requester":
         query += " AND r.requester_id = ?"
         params.append(user_id)
+    elif user_role == "manager":
+        query += " AND (r.department = ? OR r.id IN (SELECT request_id FROM approvals WHERE approver_name = ?))"
+        params.extend([user_department or "", user_name or ""])
+    elif user_role == "finance":
+        query += " AND (r.department = ? OR r.amount > 25000 OR r.tier NOT LIKE 'Tier 1%')"
+        params.append(user_department or "Finance")
+    elif user_role == "depthead":
+        query += " AND (r.department = ? OR r.amount > 100000 OR r.tier LIKE 'Tier 3%')"
+        params.append(user_department or "Executive")
 
     if filter_type == "pending":
         query += " AND r.status LIKE 'PENDING_%'"
@@ -65,9 +83,15 @@ def get_authorized_requests(user_id: str, user_role: str, filter_type: str = "al
     conn.close()
     return results
 
-def get_request_dossier(request_id: str, user_id: str, user_role: str) -> Dict[str, Any]:
+def get_request_dossier(
+    request_id: str,
+    user_id: str,
+    user_role: str,
+    user_department: Optional[str] = None,
+    user_name: Optional[str] = None
+) -> Dict[str, Any]:
     """
-    Fetches full request details. Enforces BOLA / IDOR protection.
+    Fetches full request details. Enforces BOLA / IDOR and department jurisdiction protection.
     """
     conn = get_connection()
     cursor = conn.cursor()
@@ -80,13 +104,42 @@ def get_request_dossier(request_id: str, user_id: str, user_role: str) -> Dict[s
 
     req = dict(row)
 
-    # Broken Object-Level Authorization (BOLA/IDOR) Defense
+    # 1. Requester Isolation (IDOR Defense)
     if user_role == "requester" and req["requester_id"] != user_id:
         conn.close()
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Security Violation: You are not authorized to view another employee's purchase request."
         )
+
+    # 2. Manager Department Jurisdiction
+    if user_role == "manager":
+        cursor.execute("SELECT 1 FROM approvals WHERE request_id = ? AND approver_name = ?", (request_id, user_name or ""))
+        is_assigned = cursor.fetchone() is not None
+        if req["department"] != user_department and not is_assigned:
+            conn.close()
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Security Violation: Line Managers cannot access purchase requests outside their department ({user_department}) without explicit approval assignment."
+            )
+
+    # 3. Finance Jurisdiction (Tier 1 Operational Bypasses Finance)
+    if user_role == "finance":
+        if req["amount"] <= 25000 and req["department"] != user_department:
+            conn.close()
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Security Violation: Tier 1 operational purchases (≤ ₹25,000) bypass Finance and are restricted to departmental line managers."
+            )
+
+    # 4. Department Head Jurisdiction (Executive Sign-off for Tier 3 Spend)
+    if user_role == "depthead":
+        if req["amount"] <= 100000 and req["department"] != user_department:
+            conn.close()
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Security Violation: Department Heads have jurisdiction over Tier 3 high-value spend (> ₹1,00,000) or departmental requests only."
+            )
 
     # Attachments
     cursor.execute("SELECT * FROM attachments WHERE request_id = ?", (request_id,))
@@ -136,6 +189,14 @@ def execute_approval_decision(request_id: str, action: str, comments: str, user_
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     current_status = req["status"]
     amount = req["amount"]
+
+    # 0. Strict Role Verification: Requesters cannot approve, reject, or modify approval stages
+    if user_role == "requester":
+        conn.close()
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Unauthorized: Requesters cannot approve, reject, or modify purchase requests."
+        )
 
     # 1. Block approval if flagged for missing documents
     if action == "Approve" and current_status == "FLAGGED_MISSING_DOCS":

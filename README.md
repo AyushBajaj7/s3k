@@ -39,16 +39,25 @@ In strict adherence to S3K's evaluation guidelines:
 * **Authorization Gap Prevention:** Department Heads cannot approve Tier 3 requests prematurely while Finance review is pending (returns HTTP 403).
 * **Policy Guardrail Gatekeeper:** Missing documents or invalid tax credentials **block final approval** (returns HTTP 422).
 
-### 3. Authentication & Object-Level Authorization (IDOR Defense)
+### 3. Authentication & Department Jurisdiction Access Control
 * **Real JWT Authentication:** Passwords hashed with PBKDF2-HMAC-SHA256 (100,000 rounds). Login issues signed HMAC-SHA256 JWT access tokens with 24-hour expiration.
+* **Environment Configuration:** `JWT_SECRET_KEY` is loaded from the environment / `.env` configuration, rejecting predictable static defaults and generating ephemeral 256-bit runtime keys if unconfigured.
 * **Anti-Spoofing:** All data mutations require cryptographically verified Bearer tokens; arbitrary header spoofing is rejected with HTTP 401.
-* **Row-Level Security (RLS) at Data Layer:** Requesters can *only* query and view their own purchase requests. Any attempt to access another employee's request ID returns **HTTP 403 Forbidden**.
+* **Department & Object-Level Access Control (RLS):**
+  - **Requesters:** Restricted strictly to their own submitted purchase requests (`r.requester_id = user_id`). Any attempt to access another employee's request returns **HTTP 403 Forbidden**.
+  - **Line Managers:** Restricted to requests within their department (`r.department = user.department`) or requests where they are an assigned approver.
+  - **Finance:** Has fiscal jurisdiction over all Tier 2 & Tier 3 requests (`amount > 25,000` or `tier != 'Tier 1'`) and Finance department spend. Routine Tier 1 operational spend of other departments bypasses Finance and is inaccessible to Finance (HTTP 403).
+  - **Department Heads:** Oversee executive Tier 3 high-value spend (`amount > 100,000` or `tier = 'Tier 3'`) and executive division spend. Routine non-Tier-3 requests of other departments are inaccessible (HTTP 403).
 
-### 4. Semantic AI Policy Copilot & Fraud Prevention
-* **Real Semantic RAG Retrieval Engine:** Vectorized token similarity search over 5 indexed company procurement policy clauses (`POL-01-TIERS` through `POL-05-SEQUENTIAL-STAGES`).
-* **Live LLM Integration Hook:** Automatically queries Google Gemini 1.5 Flash when `GEMINI_API_KEY` or `GOOGLE_API_KEY` is present in the environment; falls back gracefully to local context-grounded policy synthesis.
-* **Cryptographic Duplicate Invoice Fraud Detection:** Computes true SHA-256 digest of invoice data and detects duplicate fraud collisions against historical database records.
-* **OCR Ingestion:** Structured field extraction (vendor, GSTIN, amount) with confidence scores, designed for production integration with Google Cloud Document AI or AWS Textract.
+### 4. AI Policy Copilot, Fraud Detection & Transparent Capabilities Disclosure
+* **Semantic Policy Retrieval:** Keyword-weighted token similarity search across 5 indexed company procurement policy clauses (`POL-01-TIERS` through `POL-05-SEQUENTIAL-STAGES`).
+* **Live LLM Integration Hook:** Automatically connects to Google Gemini 1.5 Flash when `GEMINI_API_KEY` is present in the environment; falls back gracefully to local context-grounded policy synthesis.
+* **XSS Sanitization:** All AI responses and metadata in the frontend are sanitized and escaped prior to rendering.
+* **Cryptographic Duplicate Invoice Fraud Detection:** Computes true SHA-256 digests and detects duplicate fraud collisions against historical records.
+* **Transparent Architecture Disclosure:**
+  - *Retrieval Engine:* Uses keyword-weighted token similarity rather than high-dimensional vector embeddings (e.g. pgvector/Pinecone).
+  - *OCR Fields:* Structured procurement fields (vendor, GSTIN, amount, confidence) simulate Document AI / Textract pipeline outputs rather than performing client-side binary PDF OCR parsing.
+  - *Duplicate Detection:* Evaluates cryptographic SHA-256 hash collisions of invoice seeds and payloads.
 
 ### 5. Verifiable Hash-Chained Audit Ledger
 * **Blockchain-Style Linked Log:** Every audit row stores `prev_hash` and `log_hash = SHA256(prev_hash + req_id + actor + role + action + details + timestamp)`.
@@ -58,30 +67,34 @@ In strict adherence to S3K's evaluation guidelines:
 
 ## 🛠️ Technology Stack
 * **Frontend:** Vanilla JavaScript, HTML5, Tailwind CSS CDN, Font Awesome, custom Neumorphic utilities.
-* **Backend:** Python 3.14 + **FastAPI** with RESTful endpoints and Pydantic v2 schemas.
-* **Security & Auth:** PyJWT, PBKDF2-HMAC-SHA256 password hashing, Bearer token verification.
+* **Backend:** Python 3.14 + **FastAPI** with RESTful endpoints, lifespan handlers, and Pydantic v2 schemas.
+* **Security & Auth:** PyJWT, PBKDF2-HMAC-SHA256 password hashing, Bearer token verification, environment secret configuration.
 * **Database:** SQLite (local MVP) / PostgreSQL (production) with Data Access Object authorization boundaries.
-* **AI & Search:** Semantic cosine retrieval engine + Google Gemini REST API hook.
+* **AI & Search:** Keyword-weighted token similarity retrieval engine + Google Gemini REST API hook.
 * **Testing:** Pytest / FastAPI TestClient automated test suite.
 
 ---
 
 ## 🧪 Automated UAT Verification Suite (100% Pass Rate)
 
-Run the test suite verifying all 7 core security, workflow, and AI criteria:
+Run the test suite verifying all 8 core security, workflow, and AI criteria:
 ```bash
-python backend/test_api.py
+python -m pytest backend/test_api.py -v
 ```
 
 ### Verified Test Output
 ```
-✓ Test 1 Passed: Real JWT Authentication & Signature Verification active.
-✓ Test 2 Passed: IDOR attack blocked. User cannot view another employee's request.
-✓ Test 3 Passed: Sequential approval gates strictly enforced. No stage bypassing permitted.
-✓ Test 4 Passed: Missing documents gatekeeper successfully blocks approval.
-✓ Test 5 Passed: Cryptographic SHA-256 duplicate collision detected and blocked.
-✓ Test 6 Passed: Audit ledger hash-chain 100% verified across 14 blocks.
-✓ Test 7 Passed: AI Copilot grounded via clause POL-01-TIERS (Semantic Policy RAG Engine).
+backend/test_api.py::test_1_jwt_authentication_and_tamper_defense PASSED [ 12%]
+backend/test_api.py::test_2_department_and_object_level_access_control PASSED [ 25%]
+backend/test_api.py::test_3_tier_2_sequential_approval_state_machine PASSED [ 37%]
+backend/test_api.py::test_4_tier_3_comprehensive_approval_lifecycle_and_role_guards PASSED [ 50%]
+backend/test_api.py::test_5_missing_documents_gatekeeper PASSED          [ 62%]
+backend/test_api.py::test_6_cryptographic_duplicate_invoice_detection PASSED [ 75%]
+backend/test_api.py::test_7_verifiable_hash_chain_integrity PASSED       [ 87%]
+backend/test_api.py::test_8_context_grounded_ai_copilot PASSED           [100%]
+
+======================= 8 passed in 1.27s =======================
+```
 
 🎉 ALL 7 INTEGRATION & SECURITY TESTS PASSED WITH 100% VERIFICATION!
 ```

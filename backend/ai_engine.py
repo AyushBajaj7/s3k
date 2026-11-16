@@ -8,7 +8,7 @@ import re
 import json
 import math
 import urllib.request
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Optional
 
 # Indexed Company Procurement Policy Clauses (RAG Knowledge Base)
 POLICY_KNOWLEDGE_BASE = [

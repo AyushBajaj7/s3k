@@ -10,13 +10,44 @@ Implements:
 import hashlib
 import hmac
 import os
+import secrets
+from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any
 import jwt
 from fastapi import HTTPException, status, Header
 
-# In production, this would be an environment secret (e.g. AWS Secrets Manager)
-JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "s3k-enterprise-platform-secure-token-secret-2026")
+def resolve_jwt_secret() -> str:
+    """
+    Enforces JWT secret key configuration via environment variable or .env file.
+    Rejects predictable static defaults: if unconfigured, generates an ephemeral
+    cryptographically strong 256-bit key for this process runtime.
+    """
+    secret = os.environ.get("JWT_SECRET_KEY")
+    if secret:
+        return secret
+
+    # Check for .env file in root
+    env_file = Path(__file__).resolve().parent.parent / ".env"
+    if env_file.exists():
+        try:
+            with open(env_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith("JWT_SECRET_KEY="):
+                        val = line.split("=", 1)[1].strip().strip('"\'')
+                        if val:
+                            os.environ["JWT_SECRET_KEY"] = val
+                            return val
+        except Exception:
+            pass
+
+    # Ephemeral secure entropy fallback (never a predictable static string)
+    generated = secrets.token_hex(32)
+    os.environ["JWT_SECRET_KEY"] = generated
+    return generated
+
+JWT_SECRET_KEY = resolve_jwt_secret()
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24
 

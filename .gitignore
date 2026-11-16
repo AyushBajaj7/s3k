@@ -44,3 +44,6 @@ Thumbs.db
 
 # Playwright / MCP test artifacts
 .playwright-mcp/
+
+# Local Environment Secrets
+.env

@@ -1,17 +1,23 @@
 """
-Comprehensive Automated UAT & Security Test Suite
+Comprehensive Automated UAT, Security & Workflow Test Suite
 FlowSync / BuyOps AI - S3K Case Study 03
-Verifies all 6 critical criteria:
-1. JWT Authentication & Password Hash Verification (Anti-Spoofing)
-2. Object-Level Access Control (IDOR / BOLA Prevention)
-3. Strict Sequential Approval State Machine (Role Authorization & Premature Approval Defense)
-4. Policy Gatekeeper: Missing Documents Block Final Approval
-5. Cryptographic SHA-256 Duplicate Invoice Collision Detection
-6. Verifiable Hash-Chained Audit Ledger Integrity
-7. Context-Grounded Semantic AI Copilot
+Verifies all core security, workflow, and AI criteria:
+1. Real JWT Authentication & Password Hash Verification (Anti-Spoofing & Signature Checks)
+2. Department Jurisdiction & Object-Level Access Control (RLS & IDOR Defense)
+3. Tier 2 Sequential Approval State Machine (Role Authorization & Premature Approval Defense)
+4. Tier 3 Comprehensive Sequential Lifecycle & Role Permission Guards:
+   - Department Head cannot approve before Finance
+   - Finance cannot approve before Manager
+   - Requesters cannot approve or reject
+   - Only Department Head can complete Tier 3
+5. Policy Gatekeeper: Missing Documents Block Final Approval (HTTP 422)
+6. Cryptographic SHA-256 Duplicate Invoice Collision Detection
+7. Verifiable Hash-Chained Audit Ledger Integrity
+8. Context-Grounded Semantic AI Copilot
 """
 
 import sys
+import hashlib
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -63,55 +69,188 @@ def test_1_jwt_authentication_and_tamper_defense():
 
     print("✓ Test 1 Passed: Real JWT Authentication & Signature Verification active.")
 
-def test_2_object_level_authorization_idor():
+def test_2_department_and_object_level_access_control():
     """
-    CRITERION 2: Object-Level Authorization (IDOR Defense).
-    Requester B (Lisa Park / u2) attempts to query Requester A's request (PR-1042 belonging to Sarah Chen / u1).
-    Expected: HTTP 403 Forbidden with security violation message.
+    CRITERION 2: Object-Level Authorization & Department Jurisdiction (RLS/IDOR Defense).
+    - Requester B (Lisa Park / Marketing) cannot query Requester A's request (PR-1042 / IT) -> HTTP 403.
+    - Finance cannot inspect Tier 1 operational spend of another department (bypasses Finance) -> HTTP 403.
+    - Dept Head cannot inspect non-Tier 3 requests of another department -> HTTP 403.
     """
     lisa_token = get_auth_token("lisa.park", "password123")
-    headers = {"Authorization": f"Bearer {lisa_token}"}
+    finance_token = get_auth_token("neha.gupta", "password123")
+    depthead_token = get_auth_token("rajesh.patel", "password123")
 
-    response = client.get("/api/v1/requests/PR-1042", headers=headers)
-    assert response.status_code == 403
-    assert "Security Violation" in response.json()["detail"]
-    print("✓ Test 2 Passed: IDOR attack blocked. User cannot view another employee's request.")
+    # 1. Requester Isolation (IDOR Defense)
+    res_lisa = client.get("/api/v1/requests/PR-1042", headers={"Authorization": f"Bearer {lisa_token}"})
+    assert res_lisa.status_code == 403
+    assert "Security Violation" in res_lisa.json()["detail"]
 
-def test_3_sequential_approval_state_machine():
+    # 2. Finance Jurisdiction (Tier 1 operational spend <= 25,000 bypasses Finance)
+    res_fin = client.get("/api/v1/requests/PR-1042", headers={"Authorization": f"Bearer {finance_token}"})
+    assert res_fin.status_code == 403
+    assert "Tier 1 operational purchases (≤ ₹25,000) bypass Finance" in res_fin.json()["detail"]
+
+    # 3. Dept Head Jurisdiction (Non-Tier-3 requests of other departments excluded)
+    res_dh = client.get("/api/v1/requests/PR-1043", headers={"Authorization": f"Bearer {depthead_token}"})
+    assert res_dh.status_code == 403
+    assert "Department Heads have jurisdiction over Tier 3 high-value spend" in res_dh.json()["detail"]
+
+    print("✓ Test 2 Passed: Department & Object-Level Access Controls verified (RLS & IDOR Defense).")
+
+def test_3_tier_2_sequential_approval_state_machine():
     """
-    CRITERION 3: Strict Sequential Approvals & Role Authorization.
+    CRITERION 3: Tier 2 Sequential Approvals & Role Authorization.
     - PR-1043 is in PENDING_FINANCE (Stage 2).
-    - Department Head (Rajesh Patel) attempts to approve prematurely.
-    - Expected: HTTP 403 Forbidden.
-    - Finance Manager (Neha Gupta) approves -> transitions to APPROVED.
+    - Department Head attempts premature approval of Stage 2 -> HTTP 403 Forbidden.
+    - Finance Manager approves Stage 2 -> Transitions to APPROVED.
     """
     depthead_token = get_auth_token("rajesh.patel", "password123")
     finance_token = get_auth_token("neha.gupta", "password123")
 
     # 1. Dept Head attempts premature approval of Stage 2 (bypassing Finance)
-    dh_headers = {"Authorization": f"Bearer {depthead_token}"}
     res_premature = client.post(
         "/api/v1/requests/PR-1043/decision",
         json={"request_id": "PR-1043", "action": "Approve", "comments": "Attempting premature sign-off"},
-        headers=dh_headers
+        headers={"Authorization": f"Bearer {depthead_token}"}
     )
     assert res_premature.status_code == 403
     assert "Stage 2 requires Finance Manager approval" in res_premature.json()["detail"]
 
     # 2. Finance approves authorized stage
-    fin_headers = {"Authorization": f"Bearer {finance_token}"}
     res_fin = client.post(
         "/api/v1/requests/PR-1043/decision",
         json={"request_id": "PR-1043", "action": "Approve", "comments": "Budget code confirmed."},
-        headers=fin_headers
+        headers={"Authorization": f"Bearer {finance_token}"}
     )
     assert res_fin.status_code == 200
     assert res_fin.json()["new_status"] == "APPROVED"
-    print("✓ Test 3 Passed: Sequential approval gates strictly enforced. No stage bypassing permitted.")
+    print("✓ Test 3 Passed: Tier 2 sequential approval gates strictly enforced.")
 
-def test_4_missing_documents_gatekeeper():
+def test_4_tier_3_comprehensive_approval_lifecycle_and_role_guards():
     """
-    CRITERION 4: Missing Documents Block Final Approval.
+    CRITERION 4: Tier 3 Sequential Lifecycle & Role Permission Guards.
+    Proves all 4 mandatory conditions:
+    1. Finance cannot approve before Manager (Stage 1).
+    2. Department Head cannot approve before Finance (Stage 1 & Stage 2).
+    3. Requesters cannot approve or reject.
+    4. Only Department Head can complete Tier 3 (Stage 3).
+    """
+    requester_token = get_auth_token("sarah.chen", "password123")
+    manager_token = get_auth_token("arun.verma", "password123")
+    finance_token = get_auth_token("neha.gupta", "password123")
+    depthead_token = get_auth_token("rajesh.patel", "password123")
+
+    # Step A: Create a brand new Tier 3 request (> ₹1,00,000, 2 competitive quotes)
+    dummy_invoice_hash = hashlib.sha256(b"ORACLE_CLOUD_DATABASE_PO_9999_2025_INR").hexdigest()
+    create_payload = {
+        "title": "Oracle Exadata Cloud Migration",
+        "category": "Cloud & Infra",
+        "vendor": "Oracle India",
+        "amount": 350000.0,
+        "business_justification": "Core database capacity scaling for enterprise ERP.",
+        "department": "Engineering",
+        "requester_name": "Priya Sharma",
+        "invoice_sha256": dummy_invoice_hash,
+        "quotes_count": 2
+    }
+    create_res = client.post("/api/v1/requests", json=create_payload, headers={"Authorization": f"Bearer {requester_token}"})
+    assert create_res.status_code == 201
+    tier3_id = create_res.json()["request_id"]
+    assert create_res.json()["status"] == "PENDING_MANAGER"
+
+    # Guard 1: Finance CANNOT approve before Manager
+    res_fin_early = client.post(
+        f"/api/v1/requests/{tier3_id}/decision",
+        json={"request_id": tier3_id, "action": "Approve", "comments": "Finance jumping ahead"},
+        headers={"Authorization": f"Bearer {finance_token}"}
+    )
+    assert res_fin_early.status_code == 403
+    assert "Stage 1 requires Line Manager approval" in res_fin_early.json()["detail"]
+
+    # Guard 2: Department Head CANNOT approve before Finance & Manager
+    res_dh_early = client.post(
+        f"/api/v1/requests/{tier3_id}/decision",
+        json={"request_id": tier3_id, "action": "Approve", "comments": "Dept Head jumping ahead"},
+        headers={"Authorization": f"Bearer {depthead_token}"}
+    )
+    assert res_dh_early.status_code == 403
+    assert "Stage 1 requires Line Manager approval" in res_dh_early.json()["detail"]
+
+    # Guard 3: Requesters CANNOT approve or reject
+    res_req_approve = client.post(
+        f"/api/v1/requests/{tier3_id}/decision",
+        json={"request_id": tier3_id, "action": "Approve", "comments": "Self-approving"},
+        headers={"Authorization": f"Bearer {requester_token}"}
+    )
+    assert res_req_approve.status_code == 403
+    assert "Requesters cannot approve, reject, or modify" in res_req_approve.json()["detail"]
+
+    res_req_reject = client.post(
+        f"/api/v1/requests/{tier3_id}/decision",
+        json={"request_id": tier3_id, "action": "Reject", "comments": "Self-rejecting"},
+        headers={"Authorization": f"Bearer {requester_token}"}
+    )
+    assert res_req_reject.status_code == 403
+    assert "Requesters cannot approve, reject, or modify" in res_req_reject.json()["detail"]
+
+    # Stage 1: Line Manager approves properly
+    res_mgr = client.post(
+        f"/api/v1/requests/{tier3_id}/decision",
+        json={"request_id": tier3_id, "action": "Approve", "comments": "Line Manager verified architecture."},
+        headers={"Authorization": f"Bearer {manager_token}"}
+    )
+    assert res_mgr.status_code == 200
+    assert res_mgr.json()["new_status"] == "PENDING_FINANCE"
+
+    # Guard 4: Department Head CANNOT approve at Stage 2 before Finance
+    res_dh_stage2 = client.post(
+        f"/api/v1/requests/{tier3_id}/decision",
+        json={"request_id": tier3_id, "action": "Approve", "comments": "Dept Head bypassing Finance"},
+        headers={"Authorization": f"Bearer {depthead_token}"}
+    )
+    assert res_dh_stage2.status_code == 403
+    assert "Tier 3 requests mandate Finance approval before Department Head sign-off" in res_dh_stage2.json()["detail"]
+
+    # Stage 2: Finance approves properly
+    res_fin = client.post(
+        f"/api/v1/requests/{tier3_id}/decision",
+        json={"request_id": tier3_id, "action": "Approve", "comments": "Finance verified Q3 budget allocation."},
+        headers={"Authorization": f"Bearer {finance_token}"}
+    )
+    assert res_fin.status_code == 200
+    assert res_fin.json()["new_status"] == "PENDING_DEPTHEAD"
+
+    # Guard 5: Line Manager or Finance CANNOT complete Stage 3
+    res_mgr_stage3 = client.post(
+        f"/api/v1/requests/{tier3_id}/decision",
+        json={"request_id": tier3_id, "action": "Approve", "comments": "Manager trying to finalize Tier 3"},
+        headers={"Authorization": f"Bearer {manager_token}"}
+    )
+    assert res_mgr_stage3.status_code == 403
+    assert "Final Tier 3 authorization requires Department Head (VP) sign-off" in res_mgr_stage3.json()["detail"]
+
+    res_fin_stage3 = client.post(
+        f"/api/v1/requests/{tier3_id}/decision",
+        json={"request_id": tier3_id, "action": "Approve", "comments": "Finance trying to finalize Tier 3"},
+        headers={"Authorization": f"Bearer {finance_token}"}
+    )
+    assert res_fin_stage3.status_code == 403
+    assert "Final Tier 3 authorization requires Department Head (VP) sign-off" in res_fin_stage3.json()["detail"]
+
+    # Guard 6: ONLY Department Head can complete Tier 3
+    res_dh_final = client.post(
+        f"/api/v1/requests/{tier3_id}/decision",
+        json={"request_id": tier3_id, "action": "Approve", "comments": "VP Engineering final executive sign-off."},
+        headers={"Authorization": f"Bearer {depthead_token}"}
+    )
+    assert res_dh_final.status_code == 200
+    assert res_dh_final.json()["new_status"] == "APPROVED"
+
+    print("✓ Test 4 Passed: Tier 3 sequential lifecycle and all 4 role permission guards verified.")
+
+def test_5_missing_documents_gatekeeper():
+    """
+    CRITERION 5: Missing Documents Block Final Approval.
     Request PR-1045 has status FLAGGED_MISSING_DOCS (missing second vendor quote).
     Expected: HTTP 422 Unprocessable Entity.
     """
@@ -125,14 +264,13 @@ def test_4_missing_documents_gatekeeper():
     )
     assert res.status_code == 422
     assert "Missing documents" in res.json()["detail"]
-    print("✓ Test 4 Passed: Missing documents gatekeeper successfully blocks approval.")
+    print("✓ Test 5 Passed: Missing documents gatekeeper successfully blocks approval.")
 
-def test_5_cryptographic_duplicate_invoice_detection():
+def test_6_cryptographic_duplicate_invoice_detection():
     """
-    CRITERION 5: Real Cryptographic Duplicate Invoice Detection.
+    CRITERION 6: Real Cryptographic Duplicate Invoice Detection.
     Submitting an invoice with the exact SHA-256 hash of a historical invoice triggers CRITICAL RISK.
     """
-    import hashlib
     known_hash = hashlib.sha256(b"AWS_INVOICE_INV9821_20250218_12500_INR").hexdigest()
 
     sarah_token = get_auth_token("sarah.chen", "password123")
@@ -155,22 +293,22 @@ def test_5_cryptographic_duplicate_invoice_detection():
     data = res.json()
     assert data["risk_level"] == "CRITICAL RISK"
     assert data["status"] == "FLAGGED_MISSING_DOCS"
-    print("✓ Test 5 Passed: Cryptographic SHA-256 duplicate collision detected and blocked.")
+    print("✓ Test 6 Passed: Cryptographic SHA-256 duplicate collision detected and blocked.")
 
-def test_6_verifiable_hash_chain_integrity():
+def test_7_verifiable_hash_chain_integrity():
     """
-    CRITERION 6: Verifiable Hash-Chained Audit Ledger.
+    CRITERION 7: Verifiable Hash-Chained Audit Ledger.
     Validates that every audit row is linked via SHA-256 hash pointer to the previous block.
     """
     verification = verify_audit_hash_chain()
     assert verification["chain_valid"] is True
     assert verification["tamper_detected"] is False
     assert verification["total_blocks"] >= 12
-    print(f"✓ Test 6 Passed: Audit ledger hash-chain 100% verified across {verification['total_blocks']} blocks.")
+    print(f"✓ Test 7 Passed: Audit ledger hash-chain 100% verified across {verification['total_blocks']} blocks.")
 
-def test_7_context_grounded_ai_copilot():
+def test_8_context_grounded_ai_copilot():
     """
-    CRITERION 7: Context-Grounded Semantic AI Copilot.
+    CRITERION 8: Context-Grounded Semantic AI Copilot.
     Verifies that AI copilot answers are semantically grounded in company procurement policies.
     """
     sarah_token = get_auth_token("sarah.chen", "password123")
@@ -180,19 +318,19 @@ def test_7_context_grounded_ai_copilot():
     res = client.post("/api/v1/ai/chat", json=query, headers=headers)
     assert res.status_code == 200
     data = res.json()
-    print("AI Copilot Response Data:", data)
     assert "Tier 3" in data["reply"]
     assert "Department Head" in data["reply"] or "Dept Head" in data["reply"] or "Head" in data["reply"]
     assert "POL-01-TIERS" in data["grounded_clause"]
-    print(f"✓ Test 7 Passed: AI Copilot grounded via clause {data['grounded_clause']} ({data['engine']}).")
+    print(f"✓ Test 8 Passed: AI Copilot grounded via clause {data['grounded_clause']} ({data['engine']}).")
 
 if __name__ == "__main__":
     reset_db()
     test_1_jwt_authentication_and_tamper_defense()
-    test_2_object_level_authorization_idor()
-    test_3_sequential_approval_state_machine()
-    test_4_missing_documents_gatekeeper()
-    test_5_cryptographic_duplicate_invoice_detection()
-    test_6_verifiable_hash_chain_integrity()
-    test_7_context_grounded_ai_copilot()
-    print("\n🎉 ALL 7 INTEGRATION & SECURITY TESTS PASSED WITH 100% VERIFICATION!")
+    test_2_department_and_object_level_access_control()
+    test_3_tier_2_sequential_approval_state_machine()
+    test_4_tier_3_comprehensive_approval_lifecycle_and_role_guards()
+    test_5_missing_documents_gatekeeper()
+    test_6_cryptographic_duplicate_invoice_detection()
+    test_7_verifiable_hash_chain_integrity()
+    test_8_context_grounded_ai_copilot()
+    print("\n🎉 ALL 8 INTEGRATION & SECURITY TESTS PASSED WITH 100% VERIFICATION!")

@@ -1539,6 +1539,25 @@
       sendCopilotMsg();
     }
 
+    // Safe HTML Escaping and Sanitization for AI Outputs
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function renderSanitizedMarkdown(raw) {
+      const safe = escapeHtml(raw);
+      return safe
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/_(.*?)_/g, '<em>$1</em>')
+        .replace(/`(.*?)`/g, '<code class="px-1 py-0.5 rounded bg-slate-200 text-slate-800 font-mono text-[10px]">$1</code>');
+    }
+
     // Real API AI Copilot Query (Context-Grounded RAG)
     async function sendCopilotMsg() {
       const input = document.getElementById("copilotInputText");
@@ -1548,7 +1567,7 @@
       const area = document.getElementById("copilotChatArea");
       const userBubble = document.createElement("div");
       userBubble.className = "p-3 rounded-2xl neu-btn-primary ml-8 text-right font-bold text-xs";
-      userBubble.innerText = text;
+      userBubble.textContent = text;
       area.appendChild(userBubble);
       input.value = "";
       area.scrollTop = area.scrollHeight;
@@ -1567,13 +1586,25 @@
           const data = await res.json();
           const aiBubble = document.createElement("div");
           aiBubble.className = "p-3.5 rounded-2xl neu-flat text-slate-800 text-xs space-y-1.5";
-          aiBubble.innerHTML = `
-            <div class="whitespace-pre-line leading-relaxed">${data.reply}</div>
-            <div class="pt-1.5 border-t border-slate-300/30 flex justify-between text-[10px] text-blue-600 font-bold">
-              <span>Engine: ${data.engine}</span>
-              <span>Grounded Clause: ${data.grounded_clause || 'Verified'}</span>
-            </div>
-          `;
+          
+          const replyContent = document.createElement("div");
+          replyContent.className = "whitespace-pre-line leading-relaxed";
+          replyContent.innerHTML = renderSanitizedMarkdown(data.reply);
+
+          const metaFooter = document.createElement("div");
+          metaFooter.className = "pt-1.5 border-t border-slate-300/30 flex justify-between text-[10px] text-blue-600 font-bold";
+          
+          const engineSpan = document.createElement("span");
+          engineSpan.textContent = `Engine: ${data.engine || "Semantic Policy RAG"}`;
+          
+          const clauseSpan = document.createElement("span");
+          clauseSpan.textContent = `Clause: ${data.grounded_clause || "Verified"}`;
+          
+          metaFooter.appendChild(engineSpan);
+          metaFooter.appendChild(clauseSpan);
+
+          aiBubble.appendChild(replyContent);
+          aiBubble.appendChild(metaFooter);
           area.appendChild(aiBubble);
           area.scrollTop = area.scrollHeight;
         } else {
