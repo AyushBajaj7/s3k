@@ -21,13 +21,16 @@ DB_PATH = Path(__file__).parent / "flowsync.db"
 GENESIS_HASH = "0" * 64
 
 def get_connection():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30.0)
     conn.row_factory = sqlite3.Row
     return conn
 
 def init_db():
     conn = get_connection()
     cursor = conn.cursor()
+
+    cursor.execute("PRAGMA journal_mode=WAL;")
+    cursor.execute("PRAGMA busy_timeout=30000;")
 
     # 1. Users table with real credentials & RBAC
     cursor.execute("""

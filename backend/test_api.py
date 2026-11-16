@@ -95,7 +95,43 @@ def test_2_department_and_object_level_access_control():
     assert res_dh.status_code == 403
     assert "Department Heads have jurisdiction over Tier 3 high-value spend" in res_dh.json()["detail"]
 
-    print("✓ Test 2 Passed: Department & Object-Level Access Controls verified (RLS & IDOR Defense).")
+    # 4. Out-of-Department Manager Approval Guard
+    # Lisa Park (Marketing) creates a departmental Tier 1 purchase
+    mkt_payload = {
+        "title": "Marketing Design Templates",
+        "category": "Marketing",
+        "vendor": "Canva Enterprise",
+        "amount": 15000.0,
+        "business_justification": "Social media creative design assets.",
+        "department": "Marketing",
+        "requester_name": "Lisa Park",
+        "invoice_sha256": hashlib.sha256(b"CANVA_MARKETING_INV_111").hexdigest(),
+        "quotes_count": 1
+    }
+    create_res = client.post("/api/v1/requests", json=mkt_payload, headers={"Authorization": f"Bearer {lisa_token}"})
+    assert create_res.status_code == 201
+    mkt_id = create_res.json()["request_id"]
+
+    # Arun Verma (Engineering Manager) attempts to approve Marketing request -> HTTP 403
+    manager_token = get_auth_token("arun.verma", "password123")
+    res_unauthorized_mgr = client.post(
+        f"/api/v1/requests/{mkt_id}/decision",
+        json={"request_id": mkt_id, "action": "Approve", "comments": "Engineering manager approving Marketing"},
+        headers={"Authorization": f"Bearer {manager_token}"}
+    )
+    assert res_unauthorized_mgr.status_code == 403
+    assert "Line Managers cannot approve or modify requests outside their department" in res_unauthorized_mgr.json()["detail"]
+
+    # 5. Tier 1 Line Manager Exclusivity (Dept Heads cannot approve Tier 1)
+    res_dh_tier1 = client.post(
+        f"/api/v1/requests/{mkt_id}/decision",
+        json={"request_id": mkt_id, "action": "Approve", "comments": "Dept Head attempting Tier 1 sign-off"},
+        headers={"Authorization": f"Bearer {depthead_token}"}
+    )
+    assert res_dh_tier1.status_code == 403
+    assert "Tier 1 requests mandate direct Line Manager approval only" in res_dh_tier1.json()["detail"]
+
+    print("✓ Test 2 Passed: Department jurisdiction, out-of-dept manager lock, and Tier 1 Line Manager exclusivity verified.")
 
 def test_3_tier_2_sequential_approval_state_machine():
     """

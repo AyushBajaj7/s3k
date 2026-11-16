@@ -167,13 +167,22 @@ def get_request_dossier(
     conn.close()
     return req
 
-def execute_approval_decision(request_id: str, action: str, comments: str, user_id: str, user_role: str, user_name: str) -> Dict[str, Any]:
+def execute_approval_decision(
+    request_id: str,
+    action: str, # 'Approve', 'Reject', 'Request Changes'
+    comments: str,
+    user_id: str,
+    user_role: str,
+    user_name: str,
+    user_department: Optional[str] = None
+) -> Dict[str, Any]:
     """
-    Enforces the sequential state machine & role authorization:
-    - Tier 1: Only Line Manager can approve.
+    Enforces sequential multi-tier approval rules, department jurisdiction, and role-specific permissions:
+    - Requesters cannot approve, reject, or modify requests.
+    - Line Managers can only approve requests in their department or where explicitly assigned.
+    - Tier 1: Strictly Line Manager only (Dept Heads and Finance cannot approve Tier 1).
     - Tier 2: Line Manager must approve first (PENDING_MANAGER -> PENDING_FINANCE), then Finance approves.
-    - Tier 3: Line Manager (PENDING_MANAGER -> PENDING_FINANCE), Finance (PENDING_FINANCE -> PENDING_DEPTHEAD), then Dept Head (PENDING_DEPTHEAD -> APPROVED).
-    - Dept Head CANNOT approve if Finance has not approved!
+    - Tier 3: Line Manager -> Finance -> Department Head.
     - Missing documents block final approval.
     """
     conn = get_connection()
@@ -198,7 +207,18 @@ def execute_approval_decision(request_id: str, action: str, comments: str, user_
             detail="Unauthorized: Requesters cannot approve, reject, or modify purchase requests."
         )
 
-    # 1. Block approval if flagged for missing documents
+    # 1. Line Manager Department Jurisdiction & Assignment Verification
+    if user_role == "manager":
+        cursor.execute("SELECT 1 FROM approvals WHERE request_id = ? AND approver_name = ?", (request_id, user_name or ""))
+        is_assigned = cursor.fetchone() is not None
+        if req["department"] != user_department and not is_assigned:
+            conn.close()
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Security Violation: Line Managers cannot approve or modify requests outside their department ({user_department}) without explicit approval assignment."
+            )
+
+    # 2. Block approval if flagged for missing documents
     if action == "Approve" and current_status == "FLAGGED_MISSING_DOCS":
         conn.close()
         raise HTTPException(
@@ -206,7 +226,7 @@ def execute_approval_decision(request_id: str, action: str, comments: str, user_
             detail="Policy Guardrail Active: Missing documents or unaddressed policy flags block final approval."
         )
 
-    # 2. Sequential Stage & Role-Specific Authorization Check
+    # 3. Sequential Stage & Role-Specific Authorization Check
     new_status = current_status
 
     if action == "Approve":
@@ -214,9 +234,12 @@ def execute_approval_decision(request_id: str, action: str, comments: str, user_
             if current_status != "PENDING_MANAGER":
                 conn.close()
                 raise HTTPException(status_code=400, detail=f"Invalid state transition from {current_status}.")
-            if user_role not in ["manager", "depthead"]: # manager is required
+            if user_role != "manager": # strictly Line Manager only
                 conn.close()
-                raise HTTPException(status_code=403, detail="Unauthorized: Only a Line Manager can approve Tier 1 requests.")
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Unauthorized: Tier 1 requests mandate direct Line Manager approval only (Department Heads and Finance cannot approve Tier 1)."
+                )
             new_status = "APPROVED"
 
         elif amount <= 100000: # Tier 2 (Manager -> Finance)

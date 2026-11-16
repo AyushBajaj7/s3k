@@ -357,11 +357,17 @@ def create_purchase_request(
         payload.vendor, payload.amount, 99.1, "Verified" if not dup_match_id else "Flagged", doc_hash
     ))
 
+    # Determine Line Manager for the request's department
+    dept = payload.department or user["department"]
+    cursor.execute("SELECT full_name FROM users WHERE role = 'manager' AND department = ?", (dept,))
+    mgr_row = cursor.fetchone()
+    assigned_mgr = mgr_row[0] if mgr_row else f"{dept} Line Manager"
+
     # Insert initial approval step
     cursor.execute("""
     INSERT INTO approvals (request_id, approver_role, approver_name, action, comments, action_timestamp)
     VALUES (?, ?, ?, ?, ?, ?)
-    """, (req_id, "Line Manager", "Arun Verma", "Pending" if init_status == "PENDING_MANAGER" else "Blocked", None, None))
+    """, (req_id, "Line Manager", assigned_mgr, "Pending" if init_status == "PENDING_MANAGER" else "Blocked", None, None))
 
     # Insert AI Analysis
     summary_bullets = [
@@ -411,7 +417,8 @@ def record_decision(
         comments=decision.comments or "",
         user_id=user["id"],
         user_role=user["role"],
-        user_name=user["full_name"]
+        user_name=user["full_name"],
+        user_department=user.get("department")
     )
 
 # ---------------------------------------------------------
